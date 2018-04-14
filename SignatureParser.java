@@ -225,8 +225,16 @@ class Signature{
                 
                 if(ports.length == 2)
                 {
-                    port2Source = ports[1];
-                    System.out.println("Port 2 source: " + port2Source);
+                    if(!((Integer.parseInt(ports[0]) > Integer.parseInt(ports[1])) || (Integer.parseInt(ports[0]) < 0) || (Integer.parseInt(ports[1]) < 0)))
+                    {
+                        port2Source = ports[1];
+                        System.out.println("Port 2 source: " + port2Source);
+                    }
+                    else{
+                        System.out.println("Port range is not valid, replacing with any");
+                        portAnySource = true;
+                        port1Target = "any";
+                    }
                 }
             
                 if(port1Source.equals("any"))
@@ -301,16 +309,24 @@ class Signature{
                 
                 if(ports.length == 2)
                 {
-                    port2Target = ports[1];
-                    System.out.println("Port 2 target: " + port2Target);
+                    if(!((Integer.parseInt(ports[0]) > Integer.parseInt(ports[1])) || (Integer.parseInt(ports[0]) < 0) || (Integer.parseInt(ports[1]) < 0)))
+                    {
+                        port2Target = ports[1];
+                        System.out.println("Port 2 target: " + port2Target);
+                    }
+                    else{
+                        System.out.println("Port range is not valid, replacing with any");
+                        portAnyTarget = true;
+                        port1Target = "any";
+                    }
                 }
                 
                 if(port1Target.equals("any"))
                 {
-                    portAnySource = true;
+                    portAnyTarget = true;
                     System.out.println("Target port any is set");
                 }
-            
+                
             } else {
                 System.out.println("Did not recognize the port format");
             }
@@ -348,7 +364,11 @@ class Signature{
         
     }
     
-    
+    // compare ip, and port numbers
+    public boolean SignatureMatching(IPPacketParser ip, int port)
+    {
+        return true;
+    }
 }
 
 class SignatureOptions{
