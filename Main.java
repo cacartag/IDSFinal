@@ -9,14 +9,24 @@ public class Main
 {   
     public static void main(String [] args) throws Exception
     {
-        OptionHandler optHandler = new OptionHandler();
-        
-        if(optHandler.parseOptions(args) == 1)
+        if(args.length > 0)
         {
-            optHandler.runOptions();
+            SignatureParser signatures = new SignatureParser(args[0]);
+
+            signatures.parseSignatures();
             
-        } else{
-            System.out.println("Error in parsing of options, exiting");
+        }else{
+            System.out.println("not enough arguments ");
         }
+        
+        //OptionHandler optHandler = new OptionHandler();
+        //
+        //if(optHandler.parseOptions(args) == 1)
+        //{
+        //    optHandler.runOptions();
+        //    
+        //} else{
+        //    System.out.println("Error in parsing of options, exiting");
+        //}
     }
 }
