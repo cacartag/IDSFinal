@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-// To compile in Windows: 	java -cp ".;commons-cli-1.4.jar;commons-lang3-3.7.jar" Main
+// To compile in Windows: 	javac -cp ".;commons-cli-1.4.jar;commons-lang3-3.7.jar" -d . Main
 // To run in Windows: 		java -cp ".;commons-cli-1.4.jar" OptionHandler
 // To compile in Linux:		javac -cp ".:commons-cli-1.4.jar" -d . OptionHandler.java
 // note I had to move libsimplepacketdriver_x64.so to /usr/lib/x86_64-Linux-GNU
