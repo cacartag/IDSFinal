@@ -15,9 +15,10 @@ public class Main
 
             signatures.parseSignatures();
             
-        }else{
+        }else {
             System.out.println("not enough arguments ");
         }
+        
         
         //OptionHandler optHandler = new OptionHandler();
         //

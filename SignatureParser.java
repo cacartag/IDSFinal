@@ -111,6 +111,7 @@ class Signature{
     private boolean portAnyTarget;
     private String rule;
     private String[] acceptedProtocols;
+    private SignatureOptions options;
     
     Signature()
     {
@@ -130,6 +131,7 @@ class Signature{
         port2Target = new String();
         portAnyTarget = false;
         rule = new String();
+        options = new SignatureOptions();
     }
     
     Signature(String[] ap)
@@ -151,6 +153,7 @@ class Signature{
         portAnyTarget = false;
         rule = new String();
         acceptedProtocols = ap;
+        options = new SignatureOptions();
     }
     
     public void parse(String r)
@@ -315,7 +318,21 @@ class Signature{
             if(splitRule.length > 7)
             {
                 System.out.println("Options detected");
+                
+                //int optionStartingIndex = rule.indexOf("(");
+                //
+                //System.out.println("Option starts at: " + optionStartingIndex);
+                
+                // parse rule string for options
+                String optionSubstring = rule.substring(rule.indexOf("(") + 1,rule.length() - 1);
+             
+                options.parse(optionSubstring);
+                //System.out.println("Options are: " + options);
+                
+                
             }
+            
+            
         } else {
             System.out.println("Rule is missing arguments, recheck format");
         }
@@ -334,7 +351,7 @@ class Signature{
     
 }
 
-class signatureOptions{
+class SignatureOptions{
     private String msg;
     private String logto;
     private String ttl;
@@ -351,8 +368,9 @@ class signatureOptions{
     private String content;
     private String sameip;
     private String sid;
-
-    signatureOptions()
+    private String option;
+    
+    SignatureOptions()
     {
         msg = new String();
         logto = new String();
@@ -372,8 +390,102 @@ class signatureOptions{
         sid = new String();
     }
     
-    public void parse()
+    public void parse(String o)
     {
+        option = o;
         
+        //System.out.println("Received options:\n" + option);
+        
+        String[] splitOption = option.split(";");
+        //System.out.println("Parsed options");
+        
+        for(int x = 0; x < splitOption.length; x++)
+        {
+            splitOption[x] = splitOption[x].trim();
+            //System.out.println(splitOption[x]);
+        }
+        
+        for(String option: splitOption)
+        {
+            String[] singleOptionParsed = option.split(":");
+            String op = "";
+            String argument = "";
+            
+            if(singleOptionParsed.length == 2)
+            {
+                op = singleOptionParsed[0].trim();
+                argument = singleOptionParsed[1].trim();
+                //System.out.println(op);
+                //System.out.println(argument);
+                
+                if(op.equals("msg"))
+                {
+                    msg = argument;
+                    System.out.println("Matched msg: " + msg);
+                } else if(op.equals("logto"))
+                {
+                    logto = argument;
+                    System.out.println("Matched logto: " + logto);
+                } else if(op.equals("ttl"))
+                {
+                    ttl = argument;
+                    System.out.println("Matched ttl: " + ttl);
+                } else if(op.equals("tos")){
+                    tos = argument;
+                    System.out.println("Matched tos: " + tos);
+                } else if(op.equals("id"))
+                {
+                    id = argument;
+                    System.out.println("Matched id: " + id);
+                } else if(op.equals("fragoffset"))
+                {
+                    fragoffset = argument;
+                    System.out.println("Matched fragoffset: " + fragoffset);
+                } else if(op.equals("fragbits"))
+                {
+                    fragbits = argument;
+                    System.out.println("Matched fragbits: " + fragbits);
+                } else if(op.equals("dsize"))
+                {
+                    dsize = argument;
+                    System.out.println("Matched dsize: " + dsize);
+                } else if(op.equals("flags"))
+                {
+                    flags = argument;
+                    System.out.println("Matched flags: " + flags);
+                } else if(op.equals("seq"))
+                {
+                    seq = argument;
+                    System.out.println("Matched seq: " + seq);
+                } else if(op.equals("ack"))
+                {
+                    ack = argument;
+                    System.out.println("Matched ack: " + ack);
+                } else if(op.equals("itype"))
+                {
+                    itype = argument;
+                    System.out.println("Matched itype: " + itype);
+                } else if(op.equals("icode"))
+                {
+                    icode = argument;
+                    System.out.println("Matched icode: " + icode);
+                } else if(op.equals("content"))
+                {
+                    content = argument;
+                    System.out.println("Matched content: " + content);
+                } else if(op.equals("sameip"))
+                {
+                    sameip = argument;
+                    System.out.println("Matched sameip: " + sameip);
+                } else if(op.equals("sid"))
+                {
+                    sid = argument;
+                    System.out.println("Matched sid: " + sid);
+                }
+                
+            } else {
+                System.out.println("Option format is not recognized");
+            }
+        }
     }
 }
