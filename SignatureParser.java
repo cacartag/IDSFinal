@@ -377,9 +377,72 @@ class Signature{
     }
     
     // compare ip, and port numbers
-    public boolean SignatureMatching(IPPacketParser ip, int port)
+    public boolean SignatureMatching(IPPacketParser ip, int sourcePort, int destinationPort)
     {
-        return true;
+        boolean matching = true;
+        
+        // if any is set for source ip, then don't need to check
+        if(!ipSource.equals("any"))
+        {
+            if(!ipSource.equals(ip.getSourceAddressString()))
+            {
+                matching = false;
+            }
+        }
+
+        // if any is set for target ip, then don't need to check
+        if(!ipTarget.equals("any"))
+        {
+            if(!ipTarget.equals(ip.getDestinationAddressString()))
+            {
+                matching = false;
+            }
+        }
+        
+        // if any is set for port 1 source, then don't need to check
+        if(!port1Source.equals("any"))
+        {
+            // if port 2 of source is empty then a range is not defined
+            if(port2Source.isEmpty())
+            {
+                if(Integer.parseInt(port1Source) != sourcePort)
+                {
+                    matching = false;
+                }
+            } else 
+            {
+                if(!(sourcePort > Integer.parseInt(port1Source)  && sourcePort < Integer.parseInt(port2Source)))
+                {
+                    matching = false;
+                }
+            }
+        }
+
+        // if any is set for port 1 target, then don't need to check
+        if(!port1Target.equals("any"))
+        {
+            // if port 2 of target is empty then a range was not defined
+            if(port2Target.isEmpty())
+            {
+                if(Integer.parseInt(port1Target) != destinationPort)
+                {
+                    matching = false;
+                }
+            } else 
+            {
+                if(!(destinationPort > Integer.parseInt(port1Target) && destinationPort < Integer.parseInt(port2Target)))
+                {
+                    matching = false;
+                }
+            }
+        }
+        
+        return matching;
+    }
+    
+    public String GetProtocol()
+    {
+        return protocol;
     }
 }
 
