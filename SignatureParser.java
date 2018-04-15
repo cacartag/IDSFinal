@@ -86,6 +86,7 @@ public class SignatureParser{
         for(int x = 0; x < rules.length; x++)
         {
             temp.parse(rules[x]);
+            temp = new Signature(acceptedProtocols);
         }
 
 
@@ -344,7 +345,7 @@ class Signature{
              
                 options.parse(optionSubstring);
                 //System.out.println("Options are: " + options);
-                options.CheckMatchingIP(new IPPacketParser());
+                //options.CheckMatchingIP(new IPPacketParser());
             }
             
             
@@ -383,6 +384,8 @@ class SignatureOptions{
     private String fragbitsOperation;
     private String dsize;
     private String flags;
+    private int flagsMask;
+    private String flagsOperation;
     private String seq;
     private String ack;
     private String itype;
@@ -413,6 +416,8 @@ class SignatureOptions{
         sid = new String();
         fragbitsMask = 0;
         fragbitsOperation = new String();
+        flagsMask = 0;
+        flagsOperation = new String();
     }
     
     public void parse(String o)
@@ -514,6 +519,11 @@ class SignatureOptions{
                         fragbitsOperation = "not";
                     }
                     
+                    if(!fragbits.isEmpty())
+                    {
+                        fragbits = "and";
+                    }
+                    
                     System.out.printf("fragbits mask: 0x%02X\n", fragbitsMask);
                     System.out.println("fragbits operation: " + fragbitsOperation);
                     
@@ -525,6 +535,76 @@ class SignatureOptions{
                 {
                     flags = argument;
                     System.out.println("Matched flags: " + flags);
+                    
+                    // Generate tcp flags mask
+                    // bit direction used
+                    // <-------
+                    // CEUAPRSF 
+                    // 76543210
+                    
+                    if(flags.indexOf('C') > -1)
+                    {
+                        flagsMask = flagsMask | 0x80;
+                    }
+                    
+                    if(flags.indexOf('E') > -1)
+                    {
+                        flagsMask = flagsMask | 0x40;
+                    }
+                    
+                    if(flags.indexOf('U') > -1)
+                    {
+                        flagsMask = flagsMask | 0x20;
+                    }
+                    
+                    if(flags.indexOf('A') > -1)
+                    {
+                        flagsMask = flagsMask | 0x10;
+                    }
+                    
+                    if(flags.indexOf('P') > -1)
+                    {
+                        flagsMask = flagsMask | 0x08;
+                    }
+                    
+                    if(flags.indexOf('R') > -1)
+                    {
+                        flagsMask = flagsMask | 0x04;
+                    }
+                    
+                    if(flags.indexOf('S') > -1)
+                    {
+                        flagsMask = flagsMask | 0x02;
+                    }
+                    
+                    if(flags.indexOf('F') > -1)
+                    {
+                        flagsMask = flagsMask | 0x01;
+                    }
+                    
+                    if(flags.indexOf('+') > 0)
+                    {
+                        flagsOperation = "and";
+                    }
+                    
+                    if(flags.indexOf('*') > 0)
+                    {
+                        flagsOperation = "or";
+                    }
+                    
+                    if(flags.indexOf('!') > 0)
+                    {
+                        flagsOperation = "not";
+                    }
+                    
+                    if(flagsOperation.isEmpty())
+                    {
+                        flagsOperation = "and";
+                    }
+                    
+                    System.out.printf("flags mask: 0x%02X\n", flagsMask);
+                    System.out.println("flags operation: " + flagsOperation);
+                    
                 } else if(op.equals("seq"))
                 {
                     seq = argument;
@@ -602,7 +682,35 @@ class SignatureOptions{
         
         if(!flags.isEmpty())
         {
-            //flags
+            // Generate tcp flags mask
+            // bit direction used
+            // <-------
+            // CEUAPRSF 
+            // 76543210
+
+            int currentTCPFlags = 0;
+            
+            if(flagsOperation.equals("and"))
+            {
+                if((flagsMask & currentTCPFlags) == flagsMask)
+                {
+                    //System.out.println("matched and operation");
+                    matching = true;
+                }
+            } else if(flagsOperation.equals("or")) {
+                if((int)((0xFF)&(flagsMask & currentTCPFlags)) > 0)
+                {
+                    //System.out.println("matched or operation");
+                    matching = true;
+                }
+            } else if(flagsOperation.equals("not")) {
+                if((flagsMask & currentTCPFlags) == 0)
+                {
+                    //System.out.println("matched not operation");
+                    matching = true;
+                }
+            }
+
         }
 
         if(!ack.isEmpty())

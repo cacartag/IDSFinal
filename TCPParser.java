@@ -126,46 +126,48 @@ public class TCPParser{
         
         tcpFlags = (int)(packet[47] & 0xFF);
         
-        if((tcpFlags & 0x80) == 0x80)
+        //might be reversed
+        
+        if((tcpFlags & 0x80) == 0x80) //0x01
             tcpFlagsString += "C: 1 \n";
         else
             tcpFlagsString += "C: 0 \n";
         
-        if((tcpFlags & 0x40) == 0x40)
+        if((tcpFlags & 0x40) == 0x40) //0x02
             tcpFlagsString += "E: 1 \n";
         else
             tcpFlagsString += "E: 0 \n";
         
-        if((tcpFlags & 0x20) == 0x20)
+        if((tcpFlags & 0x20) == 0x20) //0x04
             tcpFlagsString += "U: 1 \n";
         else 
             tcpFlagsString += "U: 0 \n";
         
-        if((tcpFlags & 0x10) == 0x10)
+        if((tcpFlags & 0x10) == 0x10) //0x08
             tcpFlagsString += "A: 1 \n";
         else
             tcpFlagsString += "A: 0 \n";
         
-        if((tcpFlags & 0x08) == 0x08)
+        if((tcpFlags & 0x08) == 0x08) //0x10
             tcpFlagsString += "P: 1 \n";
         else
             tcpFlagsString += "P: 0 \n";
         
-        if((tcpFlags & 0x04) == 0x04)
+        if((tcpFlags & 0x04) == 0x04) //0x20
             tcpFlagsString += "R: 1 \n";
         else
             tcpFlagsString += "R: 0 \n";
         
-        if((tcpFlags & 0x02) == 0x02)
+        if((tcpFlags & 0x02) == 0x02) //0x40
             tcpFlagsString += "S: 1 \n";
         else
             tcpFlagsString += "S: 0 \n";
-        
-        
-        if((tcpFlags & 0x01) == 0x01)
+     
+        if((tcpFlags & 0x01) == 0x01) //0x80
             tcpFlagsString += "F: 1 \n";
         else
             tcpFlagsString += "F: 0 \n";
+        
         
         window = (int)(packet[48] & 0xFF);
         window = window << 8;
