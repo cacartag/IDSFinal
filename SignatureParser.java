@@ -2,7 +2,6 @@ import java.util.Scanner;
 import java.util.Arrays;
 import java.util.Vector;
 import java.util.TreeMap;
-import java.util.Map;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import javax.xml.bind.DatatypeConverter;
@@ -11,7 +10,7 @@ import java.lang.*;
 
 public class SignatureParser{
     private String signatureFile;
-    private Map<String,Vector<Signature>> signatures;
+    private TreeMap<String,Vector<Signature>> signatures;
     BufferedReader reader;
     private String[] rules;
     private String[] acceptedProtocols = {"ip","arp","tcp","udp","icmp"};
@@ -87,6 +86,8 @@ public class SignatureParser{
         for(int x = 0; x < rules.length; x++)
         {
             temp.parse(rules[x]);
+            //temp.printRule();
+            
             
             if(temp.GetProtocol().equals("ip"))
             {
@@ -109,6 +110,11 @@ public class SignatureParser{
         signatures.put("udp",udpVector);
         signatures.put("icmp",icmpVector);
         
+    }
+    
+    public TreeMap<String,Vector<Signature>> GetSignatures()
+    {
+        return signatures;
     }
     
 }
@@ -503,9 +509,9 @@ class Signature{
 
         if(bidirectional)
         {
-            System.out.println("<>");
+            System.out.println("Direction: <>");
         } else {
-            System.out.println("->");
+            System.out.println("Direction: ->");
         }
         
         if(!ipTarget.isEmpty())
@@ -527,6 +533,8 @@ class Signature{
         {
             System.out.println("Port 2 Target: " + port2Target);
         }
+        
+        options.printOptions();
 
     }
 }
