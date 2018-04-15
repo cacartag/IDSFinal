@@ -5,6 +5,7 @@ import java.util.TreeMap;
 import java.util.Map;
 import java.io.BufferedReader;
 import java.io.FileReader;
+import javax.xml.bind.DatatypeConverter;
 import java.lang.*;
 
 
@@ -346,6 +347,16 @@ class Signature{
                 options.parse(optionSubstring);
                 //System.out.println("Options are: " + options);
                 //options.CheckMatchingIP(new IPPacketParser());
+                
+                //byte [] testPayload = new byte[]{0x00,0x01,(byte)0x86,(byte)0xa5,(byte)0x56,(byte)0x15,(byte)0x25,(byte)0x15,0x00,0x01,(byte)0x86,(byte)0xb5,(byte)0x76,(byte)0xa5,0x00,(byte)0x01,(byte)0x96,(byte)0xa5};
+                //boolean contentMatch = options.ContentMatching(testPayload);
+                //
+                //if(contentMatch)
+                //{
+                //    System.out.println("content matches");
+                //} else {
+                //    System.out.println("content does not match");
+                //}
             }
             
             
@@ -623,7 +634,7 @@ class SignatureOptions{
                     System.out.println("Matched icode: " + icode);
                 } else if(op.equals("content"))
                 {
-                    content = argument;
+                    content = argument.substring(2,argument.length() - 2);
                     System.out.println("Matched content: " + content);
                 } else if(op.equals("sameip"))
                 {
@@ -843,5 +854,74 @@ class SignatureOptions{
         }
         
         return false;
+    }
+    
+    public boolean ContentMatching(byte[] payload)
+    {
+        boolean matching = false;
+        //String contentParsed = content
+        if(!content.isEmpty())
+        {
+            String [] contentArray = content.split(" ");
+            byte [] contentByteArray = new byte[contentArray.length];
+            
+            for(int x = 0; x < contentArray.length; x++)
+            {
+                contentByteArray[x] = DatatypeConverter.parseHexBinary(contentArray[x])[0];
+    
+                //System.out.printf("Before: %s, After0x%02X\n",contentArray[x],contentByteArray[x]);
+    
+            }
+            
+            int countContent = 0;
+            System.out.println("ContentByteArray length: " + contentByteArray.length);
+            for(int x = 0; x < payload.length; x++)
+            {
+                if((payload[x] == contentByteArray[countContent]) && (countContent < contentByteArray.length))
+                {
+                    System.out.println("CountContent: "+ countContent);
+                    if(countContent == (contentByteArray.length -1))
+                    {
+                        matching = true;
+                        break;
+                    }
+                    countContent++;
+                } else if((payload[x] == contentByteArray[0])){
+                    countContent = 1;
+                }
+                else{
+                    countContent = 0;
+                }
+            }
+        }
+        
+        return matching;
+    }
+    
+    public boolean PayloadSizeMatching(int payloadSize)
+    {
+        boolean matching = false;
+        
+        if(!dsize.isEmpty())
+        {
+            int sizeToCompareTo = Integer.parseInt(dsize);
+            
+            if(sizeToCompareTo == payloadSize)
+            {
+                matching = true;
+            }
+        }
+        
+        return matching;
+    }
+    
+    public String messageToPrint()
+    {
+        return msg;
+    }
+    
+    public String fileToPrintTo()
+    {
+        return logto;
     }
 }
