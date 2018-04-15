@@ -344,8 +344,7 @@ class Signature{
              
                 options.parse(optionSubstring);
                 //System.out.println("Options are: " + options);
-                
-                
+                options.CheckMatchingIP(new IPPacketParser());
             }
             
             
@@ -355,6 +354,7 @@ class Signature{
         
         System.out.println();
         System.out.println();
+
 
         
         //for(int x = 0; x < 7; x++)
@@ -379,6 +379,8 @@ class SignatureOptions{
     private String id;
     private String fragoffset;
     private String fragbits;
+    private int fragbitsMask;
+    private String fragbitsOperation;
     private String dsize;
     private String flags;
     private String seq;
@@ -386,9 +388,10 @@ class SignatureOptions{
     private String itype;
     private String icode;
     private String content;
-    private String sameip;
+    private boolean sameip;
     private String sid;
     private String option;
+    
     
     SignatureOptions()
     {
@@ -406,8 +409,10 @@ class SignatureOptions{
         itype = new String();
         icode = new String();
         content = new String();
-        sameip = new String();
+        sameip = false;
         sid = new String();
+        fragbitsMask = 0;
+        fragbitsOperation = new String();
     }
     
     public void parse(String o)
@@ -463,8 +468,55 @@ class SignatureOptions{
                     System.out.println("Matched fragoffset: " + fragoffset);
                 } else if(op.equals("fragbits"))
                 {
-                    fragbits = argument;
+                    fragbits = argument.toUpperCase();
                     System.out.println("Matched fragbits: " + fragbits);
+                    
+                    // Generate fragbit mask
+                    //[0] Reserved flag
+                    //[1] Don't Fragment
+                    //[2] More Fragments
+                    // bit direction used
+                    // <--
+                    // MDR 
+                    // 210
+                    
+                    //
+                    if(fragbits.indexOf('M') > -1)
+                    {
+                        //System.out.println("M: " + fragbits.indexOf('M'));
+                        fragbitsMask = fragbitsMask | 0x04;
+                    }
+                    
+                    if(fragbits.indexOf('D') > -1)
+                    {
+                        //System.out.println("D: " + fragbits.indexOf('D'));
+                        fragbitsMask = fragbitsMask | 0x02;
+                    }
+                    
+                    if(fragbits.indexOf('R') > -1)
+                    {
+                        //System.out.println("R: " + fragbits.indexOf('R'));
+                        fragbitsMask = fragbitsMask | 0x01;
+                    }
+                    
+                    if(fragbits.indexOf('+') > 0)
+                    {
+                        fragbitsOperation = "and";
+                    }
+                    
+                    if(fragbits.indexOf('*') > 0)
+                    {
+                        fragbitsOperation = "or";
+                    }
+                    
+                    if(fragbits.indexOf('!') > 0)
+                    {
+                        fragbitsOperation = "not";
+                    }
+                    
+                    System.out.printf("fragbits mask: 0x%02X\n", fragbitsMask);
+                    System.out.println("fragbits operation: " + fragbitsOperation);
+                    
                 } else if(op.equals("dsize"))
                 {
                     dsize = argument;
@@ -495,8 +547,9 @@ class SignatureOptions{
                     System.out.println("Matched content: " + content);
                 } else if(op.equals("sameip"))
                 {
-                    sameip = argument;
-                    System.out.println("Matched sameip: " + sameip);
+                    //sameip = argument;
+                    sameip = true;
+                    System.out.println("Matched sameip ");
                 } else if(op.equals("sid"))
                 {
                     sid = argument;
@@ -507,5 +560,180 @@ class SignatureOptions{
                 System.out.println("Option format is not recognized");
             }
         }
+    }
+    
+    public boolean CheckMatchingICMP(ICMPParser icmp)
+    {
+        boolean matching = false;
+        
+        if(!itype.isEmpty())
+        {
+            int typeT = Integer.parseInt(itype);
+            if(typeT == Integer.parseInt(icmp.getTypeString()))
+            {
+                matching = true;
+            }
+        }
+        
+        if(!icode.isEmpty())
+        {
+            int codeT = Integer.parseInt(icode);
+            if(codeT == Integer.parseInt(icmp.getCodeString()))
+            {
+                matching = true;
+            }
+        }
+        
+        return matching;
+    }
+    
+    public boolean CheckMatchingTCP(TCPParser tcp)
+    {
+        boolean matching = false;
+        
+        if(!seq.isEmpty())
+        {
+            int seqT = Integer.parseInt(seq);
+            if(seqT == Integer.parseInt(tcp.getSequenceNumberString()))
+            {
+                matching = true;
+            }
+        }
+        
+        if(!flags.isEmpty())
+        {
+            //flags
+        }
+
+        if(!ack.isEmpty())
+        {
+            int ackT = Integer.parseInt(ack);
+            if(ackT == Integer.parseInt(tcp.getSequenceNumberString()))
+            {
+                matching = true;
+            }
+        }
+        
+        return matching;
+    }
+    
+    public boolean CheckMatchingIP(IPPacketParser ip)
+    {
+        boolean matching = false;
+        
+        if(!ttl.isEmpty())
+        {
+            int ttlT = Integer.parseInt(ttl);
+            if(ttlT == Integer.parseInt(ip.getTTLString()))
+            {
+                matching = true;
+            }
+        }
+        
+        if(!tos.isEmpty())
+        {
+            int tosT = Integer.parseInt(tos);
+            if(tosT == Integer.parseInt(ip.getDSCPString()))
+            {
+                matching = true;
+            }
+        }
+        
+        if(!id.isEmpty())
+        {
+            int idT = Integer.parseInt(id);
+            if(idT == Integer.parseInt(ip.getIdentification()))
+            {
+                matching = true;
+            }
+        }
+        
+        if(!fragoffset.isEmpty())
+        {
+            int fragoffsetT = Integer.parseInt(fragoffset);
+            if(fragoffsetT == Integer.parseInt(ip.getFragmentOffsetString()))
+            {
+                matching = true;
+            }
+        }
+        
+        if(sameip)
+        {
+            if(ip.getSourceAddressString().equals(ip.getDestinationAddressString()))
+            {
+                matching = true;
+            }
+        }
+        
+        if(!fragbits.isEmpty())
+        {
+            //[0] Reserved flag
+            //[1] Don't Fragment
+            //[2] More Fragments
+            // bit direction used
+            // <--
+            // MDR 
+            // 210
+            
+            byte[] ipFlags = ip.getFlags();
+            int currentFlags = 0;
+            
+            // M Flag
+            if((int)(ipFlags[2]) == 1)
+            {
+                currentFlags = currentFlags | 0x04;
+            }
+
+            // D Flag
+            if((int)(ipFlags[1]) == 1)
+            {
+                currentFlags = currentFlags | 0x02;
+            }
+            
+            // R Flag
+            if((int)(ipFlags[0]) == 1)
+            {
+                currentFlags = currentFlags | 0x01;
+            }
+            
+            if(fragbitsOperation.equals("and"))
+            {
+                if((fragbitsMask & currentFlags) == fragbitsMask)
+                {
+                    //System.out.println("matched and operation");
+                    matching = true;
+                }
+            } else if(fragbitsOperation.equals("or")) {
+                if((int)((0xFF)&(fragbitsMask & currentFlags)) > 0)
+                {
+                    //System.out.println("matched or operation");
+                    matching = true;
+                }
+            } else if(fragbitsOperation.equals("not")) {
+                if((fragbitsMask & currentFlags) == 0)
+                {
+                    //System.out.println("matched not operation");
+                    matching = true;
+                }
+            }
+            
+        }
+        
+        return matching;
+    }
+    
+    public String getSID()
+    {
+        return sid;
+    }
+    
+    public boolean SIDSet()
+    {
+        if(!fragoffset.isEmpty())
+        {
+            return true;
+        }
+        
+        return false;
     }
 }
