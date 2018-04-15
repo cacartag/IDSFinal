@@ -70,11 +70,6 @@ public class SignatureParser{
                 count++;
             }
             
-            //for(int x = 0; x < rules.length; x++)
-            //{
-            //    System.out.println(rules[x]);
-            //}
-            
         } catch(Exception e)
         {
             System.out.println(e);
@@ -83,14 +78,37 @@ public class SignatureParser{
         
         Signature temp = new Signature(acceptedProtocols);
         //temp.parse(rules[0]);
+        Vector<Signature> ipVector = new Vector<Signature>();
+        Vector<Signature> arpVector = new Vector<Signature>();
+        Vector<Signature> tcpVector = new Vector<Signature>();
+        Vector<Signature> udpVector = new Vector<Signature>();
+        Vector<Signature> icmpVector = new Vector<Signature>();
         
         for(int x = 0; x < rules.length; x++)
         {
             temp.parse(rules[x]);
+            
+            if(temp.GetProtocol().equals("ip"))
+            {
+                ipVector.add(temp);
+            } else if(temp.GetProtocol().equals("arp")){
+                arpVector.add(temp);
+            } else if(temp.GetProtocol().equals("tcp")){
+                tcpVector.add(temp);
+            } else if(temp.GetProtocol().equals("udp")){
+                udpVector.add(temp);
+            } else if(temp.GetProtocol().equals("icmp")){
+                icmpVector.add(temp);
+            }
             temp = new Signature(acceptedProtocols);
         }
 
-
+        signatures.put("ip",ipVector);
+        signatures.put("arp",arpVector);
+        signatures.put("tcp",tcpVector);
+        signatures.put("udp",udpVector);
+        signatures.put("icmp",icmpVector);
+        
     }
     
 }
@@ -171,7 +189,7 @@ class Signature{
             if(splitRule[0].equals("alert") || splitRule.equals("pass"))
             {
                 action = splitRule[0];
-                System.out.println("Action: " + action);
+                //System.out.println("Action: " + action);
             } else {
                 System.out.println("Did not recognize the action type");
             }
@@ -180,7 +198,7 @@ class Signature{
             if(Arrays.asList(acceptedProtocols).contains(splitRule[1]))
             {
                 protocol = splitRule[1];
-                System.out.println("Protocol: " + protocol);
+                //System.out.println("Protocol: " + protocol);
             } else {
                 System.out.println("Did not recognize the protocol type");
             }
@@ -208,8 +226,8 @@ class Signature{
                     System.out.println("Did not recognize ip source, and mask format");
                 }
                 
-                System.out.println("Ip Source: " + ipSource);
-                System.out.println("Mask Source: " + maskSource);
+                //System.out.println("Ip Source: " + ipSource);
+                //System.out.println("Mask Source: " + maskSource);
                 
                 
             }
@@ -223,17 +241,17 @@ class Signature{
             {
                 port1Source = ports[0];
 
-                System.out.println("Port 1 source: " + port1Source);
+                //System.out.println("Port 1 source: " + port1Source);
                 
                 if(ports.length == 2)
                 {
                     if(!((Integer.parseInt(ports[0]) > Integer.parseInt(ports[1])) || (Integer.parseInt(ports[0]) < 0) || (Integer.parseInt(ports[1]) < 0)))
                     {
                         port2Source = ports[1];
-                        System.out.println("Port 2 source: " + port2Source);
+                        //System.out.println("Port 2 source: " + port2Source);
                     }
                     else{
-                        System.out.println("Port range is not valid, replacing with any");
+                        //System.out.println("Port range is not valid, replacing with any");
                         portAnySource = true;
                         port1Target = "any";
                     }
@@ -242,7 +260,7 @@ class Signature{
                 if(port1Source.equals("any"))
                 {
                     portAnySource = true;
-                    System.out.println("Source port any is set");
+                    //System.out.println("Source port any is set");
                 }
             
             } else {
@@ -262,9 +280,9 @@ class Signature{
                 
                 if(bidirectional)
                 {
-                    System.out.println("Direction: bidirectional");
+                    //System.out.println("Direction: bidirectional");
                 } else{
-                    System.out.println("Direction: inbound");
+                    //System.out.println("Direction: inbound");
                 }
                     
             } else {
@@ -294,8 +312,8 @@ class Signature{
                     System.out.println("Did not recognize ip source, and mask format");
                 }
                 
-                System.out.println("Ip Target: " + ipTarget);
-                System.out.println("Mask Target: " + maskTarget);
+                //System.out.println("Ip Target: " + ipTarget);
+                //System.out.println("Mask Target: " + maskTarget);
             }
             else {
                 System.out.println("Did not recognize ip source, and mask format");
@@ -307,14 +325,14 @@ class Signature{
             {
                 port1Target = ports[0];
 
-                System.out.println("Port 1 target: " + port1Target);
+                //System.out.println("Port 1 target: " + port1Target);
                 
                 if(ports.length == 2)
                 {
                     if(!((Integer.parseInt(ports[0]) > Integer.parseInt(ports[1])) || (Integer.parseInt(ports[0]) < 0) || (Integer.parseInt(ports[1]) < 0)))
                     {
                         port2Target = ports[1];
-                        System.out.println("Port 2 target: " + port2Target);
+                        //System.out.println("Port 2 target: " + port2Target);
                     }
                     else{
                         System.out.println("Port range is not valid, replacing with any");
@@ -326,7 +344,7 @@ class Signature{
                 if(port1Target.equals("any"))
                 {
                     portAnyTarget = true;
-                    System.out.println("Target port any is set");
+                    //System.out.println("Target port any is set");
                 }
                 
             } else {
@@ -335,7 +353,7 @@ class Signature{
             
             if(splitRule.length > 7)
             {
-                System.out.println("Options detected");
+                //System.out.println("Options detected");
                 
                 //int optionStartingIndex = rule.indexOf("(");
                 //
@@ -366,52 +384,58 @@ class Signature{
         
         System.out.println();
         System.out.println();
-
-
-        
-        //for(int x = 0; x < 7; x++)
-        //{
-        //    System.out.println(splitRule[x]);
-        //}
-        
     }
     
     // compare ip, and port numbers
     public boolean SignatureMatching(IPPacketParser ip, int sourcePort, int destinationPort)
     {
+        
+        boolean matching1 = CheckOneWaySignature(ipSource,ipTarget,port1Source,port2Source,port1Target,port2Target,ip,sourcePort,destinationPort);
+        boolean matching2 = false;
+        
+        if(bidirectional)
+        {
+            matching2 = CheckOneWaySignature(ipTarget,ipSource,port1Target,port2Target,port1Source,port2Source,ip,sourcePort,destinationPort);
+        }
+        
+        return (matching1 | matching2);
+    }
+    
+    private boolean CheckOneWaySignature(String sourceIPUni,String targetIPUni,String port1SourceUni,String port2SourceUni,String port1TargetUni,String port2TargetUni,IPPacketParser ip, int sourcePort, int destinationPort)
+    {
         boolean matching = true;
         
         // if any is set for source ip, then don't need to check
-        if(!ipSource.equals("any"))
+        if(!sourceIPUni.equals("any"))
         {
-            if(!ipSource.equals(ip.getSourceAddressString()))
+            if(!sourceIPUni.equals(ip.getSourceAddressString()))
             {
                 matching = false;
             }
         }
 
         // if any is set for target ip, then don't need to check
-        if(!ipTarget.equals("any"))
+        if(!targetIPUni.equals("any"))
         {
-            if(!ipTarget.equals(ip.getDestinationAddressString()))
+            if(!targetIPUni.equals(ip.getDestinationAddressString()))
             {
                 matching = false;
             }
         }
         
         // if any is set for port 1 source, then don't need to check
-        if(!port1Source.equals("any"))
+        if(!port1SourceUni.equals("any"))
         {
             // if port 2 of source is empty then a range is not defined
-            if(port2Source.isEmpty())
+            if(port2SourceUni.isEmpty())
             {
-                if(Integer.parseInt(port1Source) != sourcePort)
+                if(Integer.parseInt(port1SourceUni) != sourcePort)
                 {
                     matching = false;
                 }
             } else 
             {
-                if(!(sourcePort > Integer.parseInt(port1Source)  && sourcePort < Integer.parseInt(port2Source)))
+                if(!(sourcePort > Integer.parseInt(port1SourceUni)  && sourcePort < Integer.parseInt(port2SourceUni)))
                 {
                     matching = false;
                 }
@@ -419,18 +443,18 @@ class Signature{
         }
 
         // if any is set for port 1 target, then don't need to check
-        if(!port1Target.equals("any"))
+        if(!port1TargetUni.equals("any"))
         {
             // if port 2 of target is empty then a range was not defined
-            if(port2Target.isEmpty())
+            if(port2TargetUni.isEmpty())
             {
-                if(Integer.parseInt(port1Target) != destinationPort)
+                if(Integer.parseInt(port1TargetUni) != destinationPort)
                 {
                     matching = false;
                 }
             } else 
             {
-                if(!(destinationPort > Integer.parseInt(port1Target) && destinationPort < Integer.parseInt(port2Target)))
+                if(!(destinationPort > Integer.parseInt(port1TargetUni) && destinationPort < Integer.parseInt(port2TargetUni)))
                 {
                     matching = false;
                 }
@@ -443,6 +467,67 @@ class Signature{
     public String GetProtocol()
     {
         return protocol;
+    }
+    
+    public void printRule()
+    {
+        if(!action.isEmpty())
+        {
+            System.out.println("Action: " + action);
+        }
+        
+        if(!protocol.isEmpty())
+        {
+            System.out.println("Protocol: " + protocol);
+        }
+        
+        if(!ipSource.isEmpty())
+        {
+            System.out.println("IP Source: " + ipSource);
+        }
+        
+        if(!maskSource.isEmpty())
+        {
+            System.out.println("Mask Source: " + maskSource);
+        }
+        
+        if(!port1Source.isEmpty())
+        {
+            System.out.println("Port 1 Source: " + port1Source);
+        }
+        
+        if(!port2Source.isEmpty())
+        {
+            System.out.println("Port 2 Source: " + port2Source);
+        }    
+
+        if(bidirectional)
+        {
+            System.out.println("<>");
+        } else {
+            System.out.println("->");
+        }
+        
+        if(!ipTarget.isEmpty())
+        {
+            System.out.println("IP Target: " + ipTarget);
+        }
+        
+        if(!maskTarget.isEmpty())
+        {
+            System.out.println("Mask Target: " + maskTarget);
+        }
+        
+        if(!port1Target.isEmpty())
+        {
+            System.out.println("Port 1 Target: " + port1Target);
+        }
+        
+        if(!port2Target.isEmpty())
+        {
+            System.out.println("Port 2 Target: " + port2Target);
+        }
+
     }
 }
 
@@ -525,30 +610,30 @@ class SignatureOptions{
                 if(op.equals("msg"))
                 {
                     msg = argument;
-                    System.out.println("Matched msg: " + msg);
+                    //System.out.println("Matched msg: " + msg);
                 } else if(op.equals("logto"))
                 {
                     logto = argument;
-                    System.out.println("Matched logto: " + logto);
+                    //System.out.println("Matched logto: " + logto);
                 } else if(op.equals("ttl"))
                 {
                     ttl = argument;
-                    System.out.println("Matched ttl: " + ttl);
+                    //System.out.println("Matched ttl: " + ttl);
                 } else if(op.equals("tos")){
                     tos = argument;
-                    System.out.println("Matched tos: " + tos);
+                    //System.out.println("Matched tos: " + tos);
                 } else if(op.equals("id"))
                 {
                     id = argument;
-                    System.out.println("Matched id: " + id);
+                    //System.out.println("Matched id: " + id);
                 } else if(op.equals("fragoffset"))
                 {
                     fragoffset = argument;
-                    System.out.println("Matched fragoffset: " + fragoffset);
+                    //System.out.println("Matched fragoffset: " + fragoffset);
                 } else if(op.equals("fragbits"))
                 {
                     fragbits = argument.toUpperCase();
-                    System.out.println("Matched fragbits: " + fragbits);
+                    //System.out.println("Matched fragbits: " + fragbits);
                     
                     // Generate fragbit mask
                     //[0] Reserved flag
@@ -598,17 +683,17 @@ class SignatureOptions{
                         fragbits = "and";
                     }
                     
-                    System.out.printf("fragbits mask: 0x%02X\n", fragbitsMask);
-                    System.out.println("fragbits operation: " + fragbitsOperation);
+                    //System.out.printf("fragbits mask: 0x%02X\n", fragbitsMask);
+                    //System.out.println("fragbits operation: " + fragbitsOperation);
                     
                 } else if(op.equals("dsize"))
                 {
                     dsize = argument;
-                    System.out.println("Matched dsize: " + dsize);
+                    //System.out.println("Matched dsize: " + dsize);
                 } else if(op.equals("flags"))
                 {
                     flags = argument;
-                    System.out.println("Matched flags: " + flags);
+                    //System.out.println("Matched flags: " + flags);
                     
                     // Generate tcp flags mask
                     // bit direction used
@@ -676,38 +761,38 @@ class SignatureOptions{
                         flagsOperation = "and";
                     }
                     
-                    System.out.printf("flags mask: 0x%02X\n", flagsMask);
-                    System.out.println("flags operation: " + flagsOperation);
+                    //System.out.printf("flags mask: 0x%02X\n", flagsMask);
+                    //System.out.println("flags operation: " + flagsOperation);
                     
                 } else if(op.equals("seq"))
                 {
                     seq = argument;
-                    System.out.println("Matched seq: " + seq);
+                    //System.out.println("Matched seq: " + seq);
                 } else if(op.equals("ack"))
                 {
                     ack = argument;
-                    System.out.println("Matched ack: " + ack);
+                   // System.out.println("Matched ack: " + ack);
                 } else if(op.equals("itype"))
                 {
                     itype = argument;
-                    System.out.println("Matched itype: " + itype);
+                    //System.out.println("Matched itype: " + itype);
                 } else if(op.equals("icode"))
                 {
                     icode = argument;
-                    System.out.println("Matched icode: " + icode);
+                    //System.out.println("Matched icode: " + icode);
                 } else if(op.equals("content"))
                 {
                     content = argument.substring(2,argument.length() - 2);
-                    System.out.println("Matched content: " + content);
+                    //System.out.println("Matched content: " + content);
                 } else if(op.equals("sameip"))
                 {
                     //sameip = argument;
                     sameip = true;
-                    System.out.println("Matched sameip ");
+                    //System.out.println("Matched sameip ");
                 } else if(op.equals("sid"))
                 {
                     sid = argument;
-                    System.out.println("Matched sid: " + sid);
+                   // System.out.println("Matched sid: " + sid);
                 }
                 
             } else {
@@ -986,5 +1071,87 @@ class SignatureOptions{
     public String fileToPrintTo()
     {
         return logto;
+    }
+    
+    public void printOptions()
+    {
+        if(!msg.isEmpty())
+        {
+            System.out.println("msg: " + msg);
+        }
+        
+        if(!logto.isEmpty())
+        {
+            System.out.println("log to: " + logto);
+        }
+        
+        if(!ttl.isEmpty())
+        {
+            System.out.println("ttl: " + ttl);
+        }
+        
+        if(!tos.isEmpty())
+        {
+            System.out.println("tos: " + tos);
+        }
+        
+        if(!id.isEmpty())
+        {
+            System.out.println("id: " + id);
+        }
+        
+        if(!fragoffset.isEmpty())
+        {
+            System.out.println("fragoffset: " + fragoffset);
+        }
+        
+        if(!fragbits.isEmpty())
+        {
+            System.out.println("fragbits: " + fragbits);
+        }
+        
+        if(!dsize.isEmpty())
+        {
+            System.out.println("dsize: " + dsize);
+        }
+        
+        if(!flags.isEmpty())
+        {
+            System.out.println("flags: " + flags);
+        }
+        
+        if(!seq.isEmpty())
+        {
+            System.out.println("seq: " + seq);
+        }
+        
+        if(!ack.isEmpty())
+        {
+            System.out.println("ack: " + ack);
+        }
+        
+        if(!itype.isEmpty())
+        {
+            System.out.println("itype: " + itype);
+        }
+        
+        if(!icode.isEmpty())
+        {
+            System.out.println("icode: " + icode);
+        }
+        if(!content.isEmpty())
+        {
+            System.out.println("content: " + content);
+        }
+        
+        if(sameip)
+        {
+            System.out.println("sameip is being checked");
+        }
+        
+        if(!sid.isEmpty())
+        {
+            System.out.println("sid: " + sid);
+        }
     }
 }
