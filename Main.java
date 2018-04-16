@@ -7,6 +7,8 @@ import java.util.Vector;
 // import java.util.Collection;
 // javac -cp ".;commons-cli-1.4.jar" -d . Main.java
 // java -cp ".;commons-cli-1.4.jar" Main
+// javac -cp ".;commons-lang3-3.7.jar;commons-net-3.6.jar" -d . Main.java
+// java -cp ".;commons-lang3-3.7.jar;commons-net-3.6.jar" Main WinnukeRules.txt winnuke.dat
 
 public class Main
 {   

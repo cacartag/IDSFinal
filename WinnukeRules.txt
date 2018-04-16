@@ -1,0 +1,1 @@
+alert tcp any any -> 192.168.1.0/24 139 (msg: "DOS Winnuke attack"; flags:U+;)

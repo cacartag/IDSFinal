@@ -119,6 +119,7 @@ public class SignatureParser{
     
 }
 
+/*
 class Signature{
     private String action;
     private String protocol;
@@ -393,28 +394,28 @@ class Signature{
     }
     
     // compare ip, and port numbers
-    public boolean SignatureMatching(IPPacketParser ip, int sourcePort, int destinationPort)
+    public boolean SignatureMatching(IPPacketParser ip, int sourcePort, int destinationPort, boolean portAvailable)
     {
         
-        boolean matching1 = CheckOneWaySignature(ipSource,ipTarget,port1Source,port2Source,port1Target,port2Target,ip,sourcePort,destinationPort);
+        boolean matching1 = CheckOneWaySignature(ipSource,maskSource,ipTarget,maskTarget,port1Source,port2Source,port1Target,port2Target,ip,sourcePort,destinationPort, portAvailable);
         boolean matching2 = false;
         
         if(bidirectional)
         {
-            matching2 = CheckOneWaySignature(ipTarget,ipSource,port1Target,port2Target,port1Source,port2Source,ip,sourcePort,destinationPort);
+            matching2 = CheckOneWaySignature(ipTarget,maskTarget,ipSource,maskSource,port1Target,port2Target,port1Source,port2Source,ip,sourcePort,destinationPort, portAvailable);
         }
         
         return (matching1 | matching2);
     }
     
-    private boolean CheckOneWaySignature(String sourceIPUni,String targetIPUni,String port1SourceUni,String port2SourceUni,String port1TargetUni,String port2TargetUni,IPPacketParser ip, int sourcePort, int destinationPort)
+    private boolean CheckOneWaySignature(String sourceIPUni, String sourceMaskUni,String targetIPUni,String targetMaskUni,String port1SourceUni,String port2SourceUni,String port1TargetUni,String port2TargetUni,IPPacketParser ip, int sourcePort, int destinationPort, boolean portAvailable)
     {
         boolean matching = true;
         
         // if any is set for source ip, then don't need to check
         if(!sourceIPUni.equals("any"))
         {
-            if(!sourceIPUni.equals(ip.getSourceAddressString()))
+            if(!InSameSubnet(sourceIPUni,sourceMaskUni,ip.getSourceAddressString()))
             {
                 matching = false;
             }
@@ -423,50 +424,98 @@ class Signature{
         // if any is set for target ip, then don't need to check
         if(!targetIPUni.equals("any"))
         {
-            if(!targetIPUni.equals(ip.getDestinationAddressString()))
+            if(!InSameSubnet(targetIPUni, targetMaskUni, ip.getDestinationAddressString()))
             {
                 matching = false;
             }
         }
         
-        // if any is set for port 1 source, then don't need to check
-        if(!port1SourceUni.equals("any"))
+        // this will only not work for icmp
+        if(portAvailable)
         {
-            // if port 2 of source is empty then a range is not defined
-            if(port2SourceUni.isEmpty())
+            // if any is set for port 1 source, then don't need to check
+            if(!port1SourceUni.equals("any"))
             {
-                if(Integer.parseInt(port1SourceUni) != sourcePort)
+                // if port 2 of source is empty then a range is not defined
+                if(port2SourceUni.isEmpty())
                 {
-                    matching = false;
-                }
-            } else 
-            {
-                if(!(sourcePort > Integer.parseInt(port1SourceUni)  && sourcePort < Integer.parseInt(port2SourceUni)))
+                    if(Integer.parseInt(port1SourceUni) != sourcePort)
+                    {
+                        matching = false;
+                    }
+                } else 
                 {
-                    matching = false;
+                    if(!(sourcePort > Integer.parseInt(port1SourceUni)  && sourcePort < Integer.parseInt(port2SourceUni)))
+                    {
+                        matching = false;
+                    }
                 }
             }
-        }
-
-        // if any is set for port 1 target, then don't need to check
-        if(!port1TargetUni.equals("any"))
-        {
-            // if port 2 of target is empty then a range was not defined
-            if(port2TargetUni.isEmpty())
+    
+            // if any is set for port 1 target, then don't need to check
+            if(!port1TargetUni.equals("any"))
             {
-                if(Integer.parseInt(port1TargetUni) != destinationPort)
+                // if port 2 of target is empty then a range was not defined
+                if(port2TargetUni.isEmpty())
                 {
-                    matching = false;
-                }
-            } else 
-            {
-                if(!(destinationPort > Integer.parseInt(port1TargetUni) && destinationPort < Integer.parseInt(port2TargetUni)))
+                    if(Integer.parseInt(port1TargetUni) != destinationPort)
+                    {
+                        matching = false;
+                    }
+                } else 
                 {
-                    matching = false;
+                    if(!(destinationPort > Integer.parseInt(port1TargetUni) && destinationPort < Integer.parseInt(port2TargetUni)))
+                    {
+                        matching = false;
+                    }
                 }
             }
         }
         
+        return matching;
+    }
+    
+    public boolean InSameSubnet(String ipLocal, String subnetMask, String ipMatching)
+    {
+        boolean matching = false;
+        
+        String [] ipLocalSplit = ipLocal.split(".");
+        String [] ipMatchingSplit = ipLocal.split(".");
+        
+        int subnetMaskInt = Integer.parseInt(subnetMask);
+        int subnetMaskMask = 0;
+
+        byte [] ipLocalByte = new byte[4];
+        byte [] ipMatchingByte = new byte[4];
+        
+        int ipLocalInt = 0;
+        int ipMatchingInt = 0;
+        
+        int ipLocalAnd = 0;
+        int ipMatchingAnd = 0;
+        
+        for(int x = 0; x < subnetMaskInt; x++)
+        {
+            subnetMaskMask = subnetMaskMask | (1 << (32-x));
+        }
+        
+        for(int x = 0; x < 4; x++)
+        {
+            ipLocalByte[x] = DatatypeConverter.parseHexBinary(ipLocalSplit[x])[0];
+            ipMatchingByte[x] = DatatypeConverter.parseHexBinary(ipMatchingSplit[x])[0];
+        }
+        
+        ipLocalInt = (ipLocalByte[0] << 24) | (ipLocalByte[1] << 16) | (ipLocalByte[2] << 8) | (ipLocalByte[3]);
+        ipMatchingInt = (ipMatchingByte[0] << 24) | (ipMatchingByte[1] << 16) | (ipMatchingByte[2] << 8) | (ipMatchingByte[3]);
+        
+        ipLocalAnd = ipLocalInt & subnetMaskMask;
+        ipMatchingAnd = ipMatchingInt & subnetMaskMask;
+        
+        if(ipLocalAnd == ipMatchingAnd)
+        {
+            matching = true;
+        }
+
         return matching;
     }
     
@@ -542,9 +591,9 @@ class Signature{
         options.printOptions();
 
     }
-}
+}*/
 
-class SignatureOptions{
+/*class SignatureOptions{
     private String msg;
     private String logto;
     private String ttl;
@@ -1167,4 +1216,4 @@ class SignatureOptions{
             System.out.println("sid: " + sid);
         }
     }
-}
+}*/

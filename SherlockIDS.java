@@ -191,7 +191,7 @@ public class SherlockIDS{
                             icmp.parsePacket(packet);
                             icmp.printAll();
                             
-                            // checking icmp signatures
+                            // checking icmp rules
                             for(int x = 0; x < icmpRules.size(); x++)
                             {
                                 Signature icmpRule = icmpRules.get(x);
@@ -199,21 +199,21 @@ public class SherlockIDS{
                                 
                                 //icmpRule.CheckMatchingICMP(icmp);
                                 
-                                if(icmpOptions.CheckMatchingICMP(icmp))
-                                {
-                                    String message = icmpOptions.messageToPrint();
-                                    String sid = icmpOptions.getSID();
-                                    
-                                    if(!message.isEmpty())
-                                    {
-                                        System.out.println(message);
-                                    }
-                                    
-                                    if(!sid.isEmpty())
-                                    {
-                                        System.out.println(sid);
-                                    }
-                                }
+                                //if(icmpOptions.CheckMatchingICMP(icmp))
+                                //{
+                                //    String message = icmpOptions.messageToPrint();
+                                //    String sid = icmpOptions.getSID();
+                                //    
+                                //    if(!message.isEmpty())
+                                //    {
+                                //        System.out.println(message);
+                                //    }
+                                //    
+                                //    if(!sid.isEmpty())
+                                //    {
+                                //        System.out.println(sid);
+                                //    }
+                                //}
                                 
                                 //if(icmpRule.CheckMatchingICMP(icmp))
                                 //{
@@ -236,6 +236,35 @@ public class SherlockIDS{
                         {
                             tcp.parsePacket(packet);
                             tcp.printAll();
+                            
+                            //SignatureMatching(IPPacketParser ip, int sourcePort, int destinationPort, boolean portAvailable)
+                           
+                            // checking tcp rules
+                            for(int x = 0; x < tcpRules.size(); x++)
+                            {
+                                Signature tcpRule = tcpRules.get(x);
+                                SignatureOptions tcpOptions = tcpRule.GetSignatureOptions();
+                                
+                                boolean matchedSignature = tcpRule.SignatureMatching(ip, Integer.parseInt(tcp.getSourcePortString()), Integer.parseInt(tcp.getDestinationPortString()), true);
+                                boolean matchedOptions = tcpOptions.CheckMatchingTCP(tcp);
+                                    
+                                if(matchedSignature)
+                                {
+                                    System.out.println("signature matched");
+                                }
+                                else{
+                                    System.out.println("did not match signature");
+                                }
+                                
+                                if(matchedOptions)
+                                {
+                                    System.out.println("matched options");
+                                } else {
+                                    System.out.println("did not match options");
+                                }
+                            }
+                           
+                           
                         } else if(Integer.parseInt(ip.getProtocolString()) == 17)
                         {
                             udp.parsePacket(packet);
