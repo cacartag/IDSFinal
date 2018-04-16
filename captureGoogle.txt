@@ -1,0 +1,8 @@
+2018/04/16 17:58:01 Google icmp Echo received 40
+
+2018/04/16 17:58:03 Google icmp Echo received 40
+
+2018/04/16 17:58:03 Google icmp Echo received 40
+
+2018/04/16 17:58:04 Google icmp Echo received 40
+

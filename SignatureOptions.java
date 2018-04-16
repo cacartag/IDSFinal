@@ -85,7 +85,7 @@ public class SignatureOptions{
                 
                 if(op.equals("msg"))
                 {
-                    msg = argument;
+                    msg = argument.substring(1,argument.length() - 1);
                     //System.out.println("Matched msg: " + msg);
                 } else if(op.equals("logto"))
                 {
@@ -306,11 +306,11 @@ public class SignatureOptions{
     {
         boolean matching = false;
         
-        System.out.println("starting to check for matching tcp");
+        //System.out.println("starting to check for matching tcp");
         
         if(!seq.isEmpty())
         {
-            System.out.println("checking sequence number");
+            //System.out.println("checking sequence number");
             int seqT = Integer.parseInt(seq);
             if(seqT == Integer.parseInt(tcp.getSequenceNumberString()))
             {
@@ -322,9 +322,9 @@ public class SignatureOptions{
         {
             int currentTCPFlags = tcp.getTCPFlags();
             
-            System.out.println("checking flags ");
-            System.out.println("flags mask: " + flagsMask);            
-            System.out.println("current flags: " + currentTCPFlags);
+            //System.out.println("checking flags ");
+            //System.out.println("flags mask: " + flagsMask);            
+            //System.out.println("current flags: " + currentTCPFlags);
             // Generate tcp flags mask
             // bit direction used
             // <-------

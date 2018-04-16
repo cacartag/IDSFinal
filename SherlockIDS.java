@@ -16,6 +16,10 @@ import java.util.TreeMap;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.io.BufferedWriter;
+import java.time.format.DateTimeFormatter;  
+import java.time.LocalDateTime;    
+import java.io.FileWriter;
 
 public class SherlockIDS{
     private TreeMap<String,Vector<Signature>> signatures;
@@ -199,37 +203,61 @@ public class SherlockIDS{
                                 
                                 //icmpRule.CheckMatchingICMP(icmp);
                                 
-                                //if(icmpOptions.CheckMatchingICMP(icmp))
-                                //{
-                                //    String message = icmpOptions.messageToPrint();
-                                //    String sid = icmpOptions.getSID();
-                                //    
-                                //    if(!message.isEmpty())
-                                //    {
-                                //        System.out.println(message);
-                                //    }
-                                //    
-                                //    if(!sid.isEmpty())
-                                //    {
-                                //        System.out.println(sid);
-                                //    }
-                                //}
+                                boolean matchedSignature = icmpRule.SignatureMatching(ip, 0, 0, false);
+                                boolean matchedOptions = icmpOptions.CheckMatchingICMP(icmp);
                                 
-                                //if(icmpRule.CheckMatchingICMP(icmp))
-                                //{
-                                //    String message = icmpRule.messageToPrint();
-                                //    String sid = icmpRule.getSID();
-                                //    
-                                //    if(!message.isEmpty())
-                                //    {
-                                //        System.out.println(message);
-                                //    }
-                                //    
-                                //    if(!sid.isEmpty())
-                                //    {
-                                //        System.out.println(sid);
-                                //    }
-                                //}
+                                if(matchedSignature && matchedOptions)
+                                {
+                                    String message = icmpOptions.messageToPrint();
+                                    String sid = icmpOptions.getSID();
+                                    String logto = icmpOptions.fileToPrintTo();
+                                    
+                                    BufferedWriter out = null;
+                                    FileWriter fstream;
+                                    
+                                    if(!logto.isEmpty())
+                                    {
+                                        fstream = new FileWriter(logto,true);
+                                        out = new BufferedWriter(fstream);
+                                        String write = new String();
+                                        
+
+
+                                        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");  
+                                        LocalDateTime now = LocalDateTime.now();  
+                                        write += dtf.format(now) + " ";   
+                                        
+                                        
+                                        if(!message.isEmpty())
+                                        {
+                                            write += message + " ";
+                                        }
+                                        
+                                        if(!sid.isEmpty())
+                                        {
+                                            write += sid;
+                                        }
+                                        
+                                        write += "\n\n";
+                                        
+                                        out.write(write);
+                                        
+                                        out.close();
+
+                                    } else {
+                                        if(!message.isEmpty())
+                                        {
+                                            System.out.println(message);
+                                        }
+                                        
+                                        if(!sid.isEmpty())
+                                        {
+                                            System.out.println(sid);
+                                        }
+                                    }
+                                    
+
+                                }
                             }
                             
                         }else if(Integer.parseInt(ip.getProtocolString()) == 6)// check that the protocol is TCP
@@ -249,21 +277,57 @@ public class SherlockIDS{
                                 boolean matchedOptions = tcpOptions.CheckMatchingTCP(tcp);
                                     
                                 //tcpOptions.printOptions();
-                                  
-                                if(matchedSignature)
+                                if(matchedSignature && matchedOptions)
                                 {
-                                    System.out.println("signature matched");
+                                    String message = tcpOptions.messageToPrint();
+                                    String sid = tcpOptions.getSID();
+                                    String logto = tcpOptions.fileToPrintTo();
+                                    
+                                    BufferedWriter out = null;
+                                    FileWriter fstream;
+                                    
+                                    if(!logto.isEmpty())
+                                    {
+                                        fstream = new FileWriter(logto,true);
+                                        out = new BufferedWriter(fstream);
+                                        String write = new String();
+                                        
+
+
+                                        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");  
+                                        LocalDateTime now = LocalDateTime.now();  
+                                        write += dtf.format(now) + " ";   
+                                        
+                                        
+                                        if(!message.isEmpty())
+                                        {
+                                            write += message + " ";
+                                        }
+                                        
+                                        if(!sid.isEmpty())
+                                        {
+                                            write += sid;
+                                        }
+                                        
+                                        write += "\n\n";
+                                        
+                                        out.write(write);
+                                        
+                                        out.close();
+
+                                    } else {
+                                        if(!message.isEmpty())
+                                        {
+                                            System.out.println(message);
+                                        }
+                                        
+                                        if(!sid.isEmpty())
+                                        {
+                                            System.out.println(sid);
+                                        }
+                                    }
                                 }
-                                else{
-                                    System.out.println("did not match signature");
-                                }
-                                
-                                if(matchedOptions)
-                                {
-                                    System.out.println("matched options");
-                                } else {
-                                    System.out.println("did not match options");
-                                }
+                                    
                             }
                            
                            
@@ -271,6 +335,69 @@ public class SherlockIDS{
                         {
                             udp.parsePacket(packet);
                             udp.printAll();
+                        } else {
+                            //SignatureMatching(IPPacketParser ip, int sourcePort, int destinationPort, boolean portAvailable)
+                           
+                            // checking ip rules
+                            for(int x = 0; x < tcpRules.size(); x++)
+                            {
+                                Signature ipRule = ipRules.get(x);
+                                SignatureOptions ipOptions = ipRule.GetSignatureOptions();
+                                
+                                boolean matchedSignature = ipRule.SignatureMatching(ip,0, 0, false);
+                                boolean matchedOptions = ipOptions.CheckMatchingTCP(tcp);
+                                
+                                if(matchedSignature && matchedOptions)
+                                {
+                                    String message = ipOptions.messageToPrint();
+                                    String sid = ipOptions.getSID();
+                                    String logto = ipOptions.fileToPrintTo();
+                                    
+                                    BufferedWriter out = null;
+                                    FileWriter fstream;
+                                    
+                                    if(!logto.isEmpty())
+                                    {
+                                        fstream = new FileWriter(logto,true);
+                                        out = new BufferedWriter(fstream);
+                                        String write = new String();
+                                        
+
+
+                                        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");  
+                                        LocalDateTime now = LocalDateTime.now();  
+                                        write += dtf.format(now) + " ";   
+                                        
+                                        
+                                        if(!message.isEmpty())
+                                        {
+                                            write += message + " ";
+                                        }
+                                        
+                                        if(!sid.isEmpty())
+                                        {
+                                            write += sid;
+                                        }
+                                        
+                                        write += "\n\n";
+                                        
+                                        out.write(write);
+                                        
+                                        out.close();
+
+                                    } else {
+                                        if(!message.isEmpty())
+                                        {
+                                            System.out.println(message);
+                                        }
+                                        
+                                        if(!sid.isEmpty())
+                                        {
+                                            System.out.println(sid);
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 } else if(eth.getTypeString().equals("0806"))

@@ -308,7 +308,7 @@ public class Signature{
         boolean matching = true;
         
         // if any is set for source ip, then don't need to check
-        System.out.println("sourceIPUni: " + sourceIPUni);
+        //System.out.println("sourceIPUni: " + sourceIPUni);
         if(!sourceIPUni.equals("any"))
         {
             if(!InSameSubnet(sourceMaskUni,ip.getSourceAddressString()))
@@ -318,7 +318,7 @@ public class Signature{
         }
 
         // if any is set for target ip, then don't need to check
-        System.out.println("targetIPUni: " + targetIPUni);
+        //System.out.println("targetIPUni: " + targetIPUni);
         if(!targetIPUni.equals("any"))
         {
             if(!InSameSubnet(targetMaskUni, ip.getDestinationAddressString()))
