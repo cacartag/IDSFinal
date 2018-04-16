@@ -298,7 +298,7 @@ class Signature{
             // parse and check iptarget and mask
             splitIpMask = splitRule[5].split("/");
             
-            if(splitIpMask.length == 2)
+            if(splitIpMask.length == 2 || splitIpMask.length == 1)
             {
                 if(splitIpMask.length == 2)
                 {

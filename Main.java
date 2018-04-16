@@ -22,7 +22,20 @@ public class Main
             
             TreeMap<String,Vector<Signature>> signatureMapping = signatures.GetSignatures();
             // pass signatures to sherlock ids
-            SherlockIDS sherlock = new SherlockIDS(signatureMapping);
+            
+            
+            
+            SherlockIDS sherlock;
+            if(args.length == 2)
+            {
+                System.out.println("Input file is: " + args[1]);
+                sherlock = new SherlockIDS(signatureMapping,args[1]);
+            } else {
+                sherlock = new SherlockIDS(signatureMapping);
+            }
+            
+            System.out.println("number of arguments: " + args.length);
+            sherlock.SetupInvestigation();
             sherlock.Investigate();
             
         }else {
