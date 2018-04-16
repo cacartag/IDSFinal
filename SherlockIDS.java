@@ -248,6 +248,8 @@ public class SherlockIDS{
                                 boolean matchedSignature = tcpRule.SignatureMatching(ip, Integer.parseInt(tcp.getSourcePortString()), Integer.parseInt(tcp.getDestinationPortString()), true);
                                 boolean matchedOptions = tcpOptions.CheckMatchingTCP(tcp);
                                     
+                                //tcpOptions.printOptions();
+                                  
                                 if(matchedSignature)
                                 {
                                     System.out.println("signature matched");

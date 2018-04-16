@@ -306,6 +306,8 @@ public class SignatureOptions{
     {
         boolean matching = false;
         
+        System.out.println("starting to check for matching tcp");
+        
         if(!seq.isEmpty())
         {
             System.out.println("checking sequence number");
@@ -318,15 +320,17 @@ public class SignatureOptions{
         
         if(!flags.isEmpty())
         {
+            int currentTCPFlags = tcp.getTCPFlags();
+            
             System.out.println("checking flags ");
+            System.out.println("flags mask: " + flagsMask);            
+            System.out.println("current flags: " + currentTCPFlags);
             // Generate tcp flags mask
             // bit direction used
             // <-------
             // CEUAPRSF 
             // 76543210
 
-            int currentTCPFlags = 0;
-            
             if(flagsOperation.equals("and"))
             {
                 if((flagsMask & currentTCPFlags) == flagsMask)
