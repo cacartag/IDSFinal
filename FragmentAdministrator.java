@@ -36,6 +36,8 @@ public class FragmentAdministrator extends Thread
         BufferedWriter out = null;       
         FileWriter fstream;
         
+        System.out.println("started fragment administrator");
+        
         try{
             fstream = new FileWriter("Fragment.txt", true); //true tells to append data.
             out = new BufferedWriter(fstream);        

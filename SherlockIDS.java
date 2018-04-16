@@ -128,8 +128,12 @@ public class SherlockIDS{
         // parsing ethernet frames
         boolean continueLoopEth = true;
 
+        // admin thread for fragments
+        adminThread.start();
+        
         while(continueLoopEth)
         {
+            
             byte [] packet = getPacket();
             eth = new EthernetParser();
             ip = new IPPacketParser();
@@ -144,7 +148,8 @@ public class SherlockIDS{
                 eth.parsePacket(packet);
 
                 if(eth.getTypeString().equals("0800"))
-                {
+                {   
+                    
                     ip.parsePacket(packet);
                         
                     if(ip.getIfFragment() == true)
@@ -203,9 +208,24 @@ public class SherlockIDS{
             {
                 continueLoopEth = false;
             }
-            
-
         }
+        threads = threadVector.toArray();
+        
+        while(threadsStillAlive)
+        {
+            threadsStillAlive = false;
+            if(threads != null)
+            {
+                for(int x = 0; x < threads.length; x++)
+                {
+                    if(((IPFragmentAssembler)threads[x]).isAlive())
+                    {
+                        threadsStillAlive = true;
+                    }
+                }
+            }
+        }
+        mainDone.set(1);       
 
     }
 
