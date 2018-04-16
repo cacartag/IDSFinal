@@ -125,6 +125,12 @@ public class SherlockIDS{
         Object threads[];
         boolean threadsStillAlive = true;
         
+        Vector<Signature> arpRules = signatures.get("arp");
+        Vector<Signature> ipRules = signatures.get("ip");
+        Vector<Signature> icmpRules = signatures.get("icmp");
+        Vector<Signature> tcpRules = signatures.get("tcp");
+        Vector<Signature> udpRules = signatures.get("udp");
+        
         // parsing ethernet frames
         boolean continueLoopEth = true;
 
@@ -184,6 +190,48 @@ public class SherlockIDS{
                         {
                             icmp.parsePacket(packet);
                             icmp.printAll();
+                            
+                            // checking icmp signatures
+                            for(int x = 0; x < icmpRules.size(); x++)
+                            {
+                                Signature icmpRule = icmpRules.get(x);
+                                SignatureOptions icmpOptions = icmpRule.GetSignatureOptions();
+                                
+                                //icmpRule.CheckMatchingICMP(icmp);
+                                
+                                if(icmpOptions.CheckMatchingICMP(icmp))
+                                {
+                                    String message = icmpOptions.messageToPrint();
+                                    String sid = icmpOptions.getSID();
+                                    
+                                    if(!message.isEmpty())
+                                    {
+                                        System.out.println(message);
+                                    }
+                                    
+                                    if(!sid.isEmpty())
+                                    {
+                                        System.out.println(sid);
+                                    }
+                                }
+                                
+                                //if(icmpRule.CheckMatchingICMP(icmp))
+                                //{
+                                //    String message = icmpRule.messageToPrint();
+                                //    String sid = icmpRule.getSID();
+                                //    
+                                //    if(!message.isEmpty())
+                                //    {
+                                //        System.out.println(message);
+                                //    }
+                                //    
+                                //    if(!sid.isEmpty())
+                                //    {
+                                //        System.out.println(sid);
+                                //    }
+                                //}
+                            }
+                            
                         }else if(Integer.parseInt(ip.getProtocolString()) == 6)// check that the protocol is TCP
                         {
                             tcp.parsePacket(packet);

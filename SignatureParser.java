@@ -475,6 +475,11 @@ class Signature{
         return protocol;
     }
     
+    public SignatureOptions GetSignatureOptions()
+    {
+        return options;
+    }
+    
     public void printRule()
     {
         if(!action.isEmpty())
