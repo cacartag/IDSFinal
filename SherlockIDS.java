@@ -125,7 +125,7 @@ public class SherlockIDS{
         ConcurrentLinkedQueue<Map<String,IPPacketParser>> packetQueue = new ConcurrentLinkedQueue<Map<String,IPPacketParser>>();
         ConcurrentLinkedQueue<FragmentModel> reassembledPacketQueue = new ConcurrentLinkedQueue<FragmentModel>();
         Vector<IPFragmentAssembler> threadVector = new Vector<IPFragmentAssembler>();
-        FragmentAdministrator adminThread = new FragmentAdministrator(reassembledPacketQueue,mainDone,packetQueue);
+        FragmentAdministrator adminThread = new FragmentAdministrator(reassembledPacketQueue,mainDone,packetQueue, signatures);
         Object threads[];
         boolean threadsStillAlive = true;
         

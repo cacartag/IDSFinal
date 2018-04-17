@@ -305,4 +305,33 @@ public class TCPParser{
         
     }
     
+    public String printAllReturn()
+    {
+        String tcpString = new String();
+
+        tcpString += "TCP Header: \n";
+        tcpString += "Port source: " + getSourcePortString() + "\n";
+        tcpString += "Port destination: " + getDestinationPortString() + "\n";
+        tcpString += "Sequence Number: " + getSequenceNumberString() + "\n";
+        tcpString += "Acknowledgement Number: " + getAcknowledgementNumberString() + "\n";
+        tcpString += "Offset: " + getOffsetString() + "\n";
+        tcpString += "Reserved: " + getReservedString() + "\n";
+        tcpString += "TCP Flags: \n" + getTCPFlagsString() + "\n";
+        tcpString += "Window: " + getWindowString() + "\n";
+        tcpString += "Checksum: " + getCheckSumString() + "\n";
+        tcpString += "Urgent Pointer: " + getUrgentPointerString() + "\n";
+        
+        try
+        {
+            String payloadString = new String(payload, "UTF-8");           
+            tcpString += payloadString;
+        } catch(Exception e)
+        {
+            tcpString += "Could not convert payload to string, or no payload";
+        }
+        
+        tcpString += "\n\n\n";
+        
+        return tcpString;
+    }
 }
