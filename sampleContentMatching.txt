@@ -1,3 +1,4 @@
 alert tcp any any -> any any (content: "|02 01 03|"; msg:"matched signature with content"; logto:contentMatched.txt)
-alert tcp any any -> 192.168.1.0/24 139 (msg: "DOS Winnuke attack"; flags:U+;logto: winnuke.txt; )
+alert tcp any any -> 192.168.1.0/24 139 (msg: "DOS Winnuke attack"; flags:U+;logto: winnuke.txt;)
 alert ip any any -> any any (content: "|03 00 8b 03 6e|"; logto: tcpHeaderMatch.txt; msg: "matched a tcp header";)
+alert ip any 80 -> any any (msg: "html passing through"; logto: htmlTraffic.txt;)

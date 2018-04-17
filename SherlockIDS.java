@@ -177,23 +177,25 @@ public class SherlockIDS{
                             packetQueue.add(toThread);
                             threadVector.addElement(ipf);
                             fragmentIDs.addElement(ip.getIdentification());
-                            System.out.println("Create Thread: "+ ip.getIdentification());
+                            CheckIPRules(ipRules);
+                            //System.out.println("Create Thread: "+ ip.getIdentification());
                         }else{
                             
                             // already received this packets ID
                             Map<String,IPPacketParser> toThread = new HashMap<String,IPPacketParser>();
                             toThread.put(ip.getIdentification(),ip);
                             packetQueue.add(toThread);
+                            CheckIPRules(ipRules);
                         }
                     } else {
-                        ip.printHeaderOnly();
+                        //ip.printHeaderOnly();
                         //ip.printAll();    
                         
                         // check that the protocol is icmp
                         if(Integer.parseInt(ip.getProtocolString()) == 1)
                         {
                             icmp.parsePacket(packet);
-                            icmp.printAll();
+                            //icmp.printAll();
                             
                             //checking ip rules
                             CheckIPRules(ipRules);
@@ -267,7 +269,7 @@ public class SherlockIDS{
                         }else if(Integer.parseInt(ip.getProtocolString()) == 6)// check that the protocol is TCP
                         {
                             tcp.parsePacket(packet);
-                            tcp.printAll();
+                            //tcp.printAll();
                             
                             //SignatureMatching(IPPacketParser ip, int sourcePort, int destinationPort, boolean portAvailable)
                            
@@ -344,7 +346,7 @@ public class SherlockIDS{
                         } else if(Integer.parseInt(ip.getProtocolString()) == 17)
                         {
                             udp.parsePacket(packet);
-                            udp.printAll();
+                            //udp.printAll();
                             
                             //checking ip rules
                             CheckIPRules(ipRules);

@@ -55,7 +55,7 @@ public class SignatureOptions{
         flagsOperation = new String();
     }
     
-    public void parse(String o)
+    public void parse(String o, String rule)
     {
         option = o;
         
@@ -272,7 +272,7 @@ public class SignatureOptions{
                 }
                 
             } else {
-                System.out.println("Option format is not recognized");
+                System.out.println("Option format is not recognized: " + rule);
             }
         }
     }
@@ -368,7 +368,7 @@ public class SignatureOptions{
 
         if(!ack.isEmpty())
         {
-            System.out.println("checking acknowledgement");
+            //System.out.println("checking acknowledgement");
             int ackT = Integer.parseInt(ack);
             if(ackT == Integer.parseInt(tcp.getSequenceNumberString()))
             {
@@ -526,7 +526,7 @@ public class SignatureOptions{
         if(!content.isEmpty())
         {
             
-            System.out.println("checking for content");
+            //System.out.println("checking for content");
             String [] contentArray = content.split(" ");
             byte [] contentByteArray = new byte[contentArray.length];
             
@@ -539,12 +539,12 @@ public class SignatureOptions{
             }
             
             int countContent = 0;
-            System.out.println("ContentByteArray length: " + contentByteArray.length);
+            //System.out.println("ContentByteArray length: " + contentByteArray.length);
             for(int x = 0; x < payload.length; x++)
             {
                 if((payload[x] == contentByteArray[countContent]) && (countContent < contentByteArray.length))
                 {
-                    System.out.println("CountContent: "+ countContent);
+                    //System.out.println("CountContent: "+ countContent);
                     if(countContent == (contentByteArray.length -1))
                     {
                         matching = true;
@@ -558,11 +558,6 @@ public class SignatureOptions{
                     countContent = 0;
                 }
             }
-        }
-        
-        if(matching)
-        {
-            System.out.println("matched content");
         }
         
         return matching;

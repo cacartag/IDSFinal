@@ -264,7 +264,7 @@ public class Signature{
                 // parse rule string for options
                 String optionSubstring = rule.substring(rule.indexOf("(") + 1,rule.length() - 1);
              
-                options.parse(optionSubstring);
+                options.parse(optionSubstring, rule);
                 //System.out.println("Options are: " + options);
                 //options.CheckMatchingIP(new IPPacketParser());
                 
