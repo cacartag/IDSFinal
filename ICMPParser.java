@@ -27,6 +27,10 @@ public class ICMPParser
     public byte[] getRestOfHeader() { return restOfHeader; }
     public String getRestOfHeaderString() { return restOfHeaderString; }
     
+    public byte[] getPayloadBytes() { return payload; }
+    
+    public int getPayloadSize() { return payload.length; }
+    
     public String getPayloadString() throws Exception
     { 
         try

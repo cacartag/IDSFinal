@@ -279,7 +279,7 @@ public class SignatureOptions{
     
     public boolean CheckMatchingICMP(ICMPParser icmp)
     {
-        boolean matching = false;
+        boolean matching = true;
         
         if(!itype.isEmpty())
         {
@@ -287,6 +287,8 @@ public class SignatureOptions{
             if(typeT == Integer.parseInt(icmp.getTypeString()))
             {
                 matching = true;
+            } else {
+                matching = false;
             }
         }
         
@@ -296,6 +298,8 @@ public class SignatureOptions{
             if(codeT == Integer.parseInt(icmp.getCodeString()))
             {
                 matching = true;
+            } else {
+                matching = false;
             }
         }
         
@@ -304,7 +308,7 @@ public class SignatureOptions{
     
     public boolean CheckMatchingTCP(TCPParser tcp)
     {
-        boolean matching = false;
+        boolean matching = true;
         
         //System.out.println("starting to check for matching tcp");
         
@@ -315,6 +319,8 @@ public class SignatureOptions{
             if(seqT == Integer.parseInt(tcp.getSequenceNumberString()))
             {
                 matching = true;
+            } else {
+                matching = false;
             }
         }
         
@@ -337,18 +343,24 @@ public class SignatureOptions{
                 {
                     //System.out.println("matched and operation");
                     matching = true;
+                } else {
+                    matching = false;
                 }
             } else if(flagsOperation.equals("or")) {
                 if((int)((0xFF)&(flagsMask & currentTCPFlags)) > 0)
                 {
                     //System.out.println("matched or operation");
                     matching = true;
+                } else {
+                    matching = false;
                 }
             } else if(flagsOperation.equals("not")) {
                 if((flagsMask & currentTCPFlags) == 0)
                 {
                     //System.out.println("matched not operation");
                     matching = true;
+                } else {
+                    matching = false;
                 }
             }
 
@@ -361,6 +373,8 @@ public class SignatureOptions{
             if(ackT == Integer.parseInt(tcp.getSequenceNumberString()))
             {
                 matching = true;
+            } else {
+                matching = false;
             }
         }
         
@@ -369,7 +383,7 @@ public class SignatureOptions{
     
     public boolean CheckMatchingIP(IPPacketParser ip)
     {
-        boolean matching = false;
+        boolean matching = true;
         
         if(!ttl.isEmpty())
         {
@@ -377,6 +391,8 @@ public class SignatureOptions{
             if(ttlT == Integer.parseInt(ip.getTTLString()))
             {
                 matching = true;
+            } else {
+                matching = false;
             }
         }
         
@@ -386,6 +402,8 @@ public class SignatureOptions{
             if(tosT == Integer.parseInt(ip.getDSCPString()))
             {
                 matching = true;
+            } else {
+                matching = false;
             }
         }
         
@@ -395,6 +413,8 @@ public class SignatureOptions{
             if(idT == Integer.parseInt(ip.getIdentification()))
             {
                 matching = true;
+            } else {
+                matching = false;
             }
         }
         
@@ -404,6 +424,8 @@ public class SignatureOptions{
             if(fragoffsetT == Integer.parseInt(ip.getFragmentOffsetString()))
             {
                 matching = true;
+            } else {
+                matching = false;
             }
         }
         
@@ -412,6 +434,8 @@ public class SignatureOptions{
             if(ip.getSourceAddressString().equals(ip.getDestinationAddressString()))
             {
                 matching = true;
+            } else {
+                matching = false;
             }
         }
         
@@ -452,18 +476,26 @@ public class SignatureOptions{
                 {
                     //System.out.println("matched and operation");
                     matching = true;
+                } else {
+                    matching = false;
                 }
+                
             } else if(fragbitsOperation.equals("or")) {
                 if((int)((0xFF)&(fragbitsMask & currentFlags)) > 0)
                 {
                     //System.out.println("matched or operation");
                     matching = true;
+                } else {
+                    matching = false;
                 }
+                
             } else if(fragbitsOperation.equals("not")) {
                 if((fragbitsMask & currentFlags) == 0)
                 {
                     //System.out.println("matched not operation");
                     matching = true;
+                } else {
+                    matching = false;
                 }
             }
             
@@ -493,6 +525,8 @@ public class SignatureOptions{
         //String contentParsed = content
         if(!content.isEmpty())
         {
+            
+            System.out.println("checking for content");
             String [] contentArray = content.split(" ");
             byte [] contentByteArray = new byte[contentArray.length];
             
@@ -526,7 +560,17 @@ public class SignatureOptions{
             }
         }
         
+        if(matching)
+        {
+            System.out.println("matched content");
+        }
+        
         return matching;
+    }
+    
+    public boolean ContentMatchingSet()
+    {
+        return !content.isEmpty();
     }
     
     public boolean PayloadSizeMatching(int payloadSize)
@@ -544,6 +588,11 @@ public class SignatureOptions{
         }
         
         return matching;
+    }
+    
+    public boolean PayloadSizeMatchingSet()
+    {
+        return !dsize.isEmpty();
     }
     
     public String messageToPrint()

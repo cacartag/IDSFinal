@@ -82,17 +82,17 @@ public class SherlockIDS{
     
     public void SetupInvestigation()
     {
-        System.out.println("Signatures Received by Sherlock");
-        System.out.println("IP: ");
-        PrintReceivedRules("ip");
-        System.out.println("\n\nARP: ");
-        PrintReceivedRules("arp");        
-        System.out.println("\n\nTCP: ");
-        PrintReceivedRules("tcp");
-        System.out.println("\n\nUDP: ");
-        PrintReceivedRules("udp");
-        System.out.println("\n\nICMP: ");
-        PrintReceivedRules("icmp");
+        //System.out.println("Signatures Received by Sherlock");
+        //System.out.println("IP: ");
+        //PrintReceivedRules("ip");
+        //System.out.println("\n\nARP: ");
+        //PrintReceivedRules("arp");        
+        //System.out.println("\n\nTCP: ");
+        //PrintReceivedRules("tcp");
+        //System.out.println("\n\nUDP: ");
+        //PrintReceivedRules("udp");
+        //System.out.println("\n\nICMP: ");
+        //PrintReceivedRules("icmp");
         
         if(inputFile.isEmpty())
         {
@@ -195,6 +195,9 @@ public class SherlockIDS{
                             icmp.parsePacket(packet);
                             icmp.printAll();
                             
+                            //checking ip rules
+                            CheckIPRules(ipRules);
+                            
                             // checking icmp rules
                             for(int x = 0; x < icmpRules.size(); x++)
                             {
@@ -205,8 +208,9 @@ public class SherlockIDS{
                                 
                                 boolean matchedSignature = icmpRule.SignatureMatching(ip, 0, 0, false);
                                 boolean matchedOptions = icmpOptions.CheckMatchingICMP(icmp);
+                                boolean sizeAndContentMatching = CheckSizeAndContent(icmpOptions,icmp.getPayloadBytes(), icmp.getPayloadSize());
                                 
-                                if(matchedSignature && matchedOptions)
+                                if(matchedSignature && matchedOptions && sizeAndContentMatching)
                                 {
                                     String message = icmpOptions.messageToPrint();
                                     String sid = icmpOptions.getSID();
@@ -267,6 +271,8 @@ public class SherlockIDS{
                             
                             //SignatureMatching(IPPacketParser ip, int sourcePort, int destinationPort, boolean portAvailable)
                            
+                            //checking ip rules
+                            CheckIPRules(ipRules);
                             // checking tcp rules
                             for(int x = 0; x < tcpRules.size(); x++)
                             {
@@ -275,9 +281,13 @@ public class SherlockIDS{
                                 
                                 boolean matchedSignature = tcpRule.SignatureMatching(ip, Integer.parseInt(tcp.getSourcePortString()), Integer.parseInt(tcp.getDestinationPortString()), true);
                                 boolean matchedOptions = tcpOptions.CheckMatchingTCP(tcp);
-                                    
+                                boolean sizeAndContentMatching = CheckSizeAndContent(tcpOptions,tcp.getPayloadBytes(), tcp.getPayloadSize());
+                                
+                                //if(sizeAndContentMatching)
+                                //    System.out.println("matches content");
+                                        
                                 //tcpOptions.printOptions();
-                                if(matchedSignature && matchedOptions)
+                                if(matchedSignature && matchedOptions && sizeAndContentMatching)
                                 {
                                     String message = tcpOptions.messageToPrint();
                                     String sid = tcpOptions.getSID();
@@ -335,23 +345,25 @@ public class SherlockIDS{
                         {
                             udp.parsePacket(packet);
                             udp.printAll();
-                        } else {
-                            //SignatureMatching(IPPacketParser ip, int sourcePort, int destinationPort, boolean portAvailable)
+                            
+                            //checking ip rules
+                            CheckIPRules(ipRules);
                            
-                            // checking ip rules
-                            for(int x = 0; x < tcpRules.size(); x++)
+                            for(int x = 0; x < udpRules.size(); x++)
                             {
-                                Signature ipRule = ipRules.get(x);
-                                SignatureOptions ipOptions = ipRule.GetSignatureOptions();
+                                Signature udpRule = udpRules.get(x);
+                                SignatureOptions udpOptions = udpRule.GetSignatureOptions();
                                 
-                                boolean matchedSignature = ipRule.SignatureMatching(ip,0, 0, false);
-                                boolean matchedOptions = ipOptions.CheckMatchingTCP(tcp);
+                                boolean matchedSignature = udpRule.SignatureMatching(ip, Integer.parseInt(udp.getSourcePortString()), Integer.parseInt(udp.getDestinationPortString()), true);
+                            
+                                boolean sizeAndContentMatching = CheckSizeAndContent(udpOptions,udp.getPayloadBytes(), udp.getPayloadSize());
                                 
-                                if(matchedSignature && matchedOptions)
+                                //tcpOptions.printOptions();
+                                if(matchedSignature && sizeAndContentMatching)
                                 {
-                                    String message = ipOptions.messageToPrint();
-                                    String sid = ipOptions.getSID();
-                                    String logto = ipOptions.fileToPrintTo();
+                                    String message = udpOptions.messageToPrint();
+                                    String sid = udpOptions.getSID();
+                                    String logto = udpOptions.fileToPrintTo();
                                     
                                     BufferedWriter out = null;
                                     FileWriter fstream;
@@ -396,8 +408,13 @@ public class SherlockIDS{
                                             System.out.println(sid);
                                         }
                                     }
-                                }
+                                }   
                             }
+                            
+                        } else {
+                            //SignatureMatching(IPPacketParser ip, int sourcePort, int destinationPort, boolean portAvailable)
+                           CheckIPRules(ipRules);
+
                         }
                     }
                 } else if(eth.getTypeString().equals("0806"))
@@ -543,6 +560,88 @@ public class SherlockIDS{
             }   
         }   
         return packet;
+    }
+    
+    public void CheckIPRules(Vector<Signature> ipRules) throws Exception
+    {
+        // checking ip rules
+        for(int x = 0; x < ipRules.size(); x++)
+        {
+            Signature ipRule = ipRules.get(x);
+            SignatureOptions ipOptions = ipRule.GetSignatureOptions();
+            
+            boolean matchedSignature = ipRule.SignatureMatching(ip,0, 0, false);
+            boolean matchedOptions = ipOptions.CheckMatchingIP(ip);
+            boolean sizeAndContentMatching = CheckSizeAndContent(ipOptions,ip.getPayloadBytes(), ip.getPayloadSize());
+            
+            if(matchedSignature && matchedOptions && sizeAndContentMatching)
+            {
+                String message = ipOptions.messageToPrint();
+                String sid = ipOptions.getSID();
+                String logto = ipOptions.fileToPrintTo();
+                
+                BufferedWriter out = null;
+                FileWriter fstream;
+                
+                if(!logto.isEmpty())
+                {
+                    fstream = new FileWriter(logto,true);
+                    out = new BufferedWriter(fstream);
+                    String write = new String();
+
+                    DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");  
+                    LocalDateTime now = LocalDateTime.now();  
+                    write += dtf.format(now) + " ";   
+                    
+                    
+                    if(!message.isEmpty())
+                    {
+                        write += message + " ";
+                    }
+                    
+                    if(!sid.isEmpty())
+                    {
+                        write += sid;
+                    }
+                    
+                    write += "\n\n";
+                    
+                    out.write(write);
+                    
+                    out.close();
+
+                } else {
+                    if(!message.isEmpty())
+                    {
+                        System.out.println(message);
+                    }
+                    
+                    if(!sid.isEmpty())
+                    {
+                        System.out.println(sid);
+                    }
+                }
+            }
+        }
+    }   
+    
+    public boolean CheckSizeAndContent(SignatureOptions option, byte[] payload, int payloadSize)
+    {
+        // check for payload size only if set
+        boolean payloadSizeMatching = true;
+        if(option.PayloadSizeMatchingSet())
+        {
+            payloadSizeMatching = option.PayloadSizeMatching(payloadSize);
+        }
+        
+        // check for payload content if set
+        boolean payloadContentMatching = true;
+        if(option.ContentMatchingSet())
+        {
+            payloadContentMatching = option.ContentMatching(payload);
+        }
+        
+        return payloadSizeMatching & payloadContentMatching;
     }
 
 }

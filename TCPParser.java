@@ -56,6 +56,10 @@ public class TCPParser{
     
     public String getUrgentPointerString() { return urgentPointerString; }
     
+    public byte[] getPayloadBytes() { return payload; }
+    
+    public int getPayloadSize() { return payload.length; }
+    
     public String getPayloadString() throws Exception
     { 
         try

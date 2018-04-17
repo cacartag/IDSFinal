@@ -25,6 +25,10 @@ public class UDPParser
     
     public String getCheckSumString() { return checkSumString; }
     
+    public byte[] getPayloadBytes() { return payload; }
+    
+    public int getPayloadSize() { return payload.length; }
+    
     public String getPayloadString() throws Exception
     { 
         try

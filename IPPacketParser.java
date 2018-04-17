@@ -83,6 +83,10 @@ public class IPPacketParser{
     
     public byte[] getPacket() { return packetIP; }
     
+    public byte[] getPayloadBytes() { return payload; }
+    
+    public int getPayloadSize() { return payload.length; }
+    
     public String getPayloadString() throws Exception
     { 
         try
