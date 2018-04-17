@@ -269,7 +269,7 @@ public class SherlockIDS{
                         }else if(Integer.parseInt(ip.getProtocolString()) == 6)// check that the protocol is TCP
                         {
                             tcp.parsePacket(packet);
-                            //tcp.printAll();
+                            tcp.printAll();
                             
                             //SignatureMatching(IPPacketParser ip, int sourcePort, int destinationPort, boolean portAvailable)
                            

@@ -2,3 +2,5 @@ alert tcp any any -> any any (content: "|02 01 03|"; msg:"matched signature with
 alert tcp any any -> 192.168.1.0/24 139 (msg: "DOS Winnuke attack"; flags:U+;logto: winnuke.txt;)
 alert ip any any -> any any (content: "|03 00 8b 03 6e|"; logto: tcpHeaderMatch.txt; msg: "matched a tcp header";)
 alert ip any 80 -> any any (msg: "html passing through"; logto: htmlTraffic.txt;)
+alert tcp any any -> any any (msg: "matching specific sequence number"; logto: sequenceTest.txt;seq:907512291;)
+alert tcp any any -> any any (msg: "matching acknowledgement number"; logto: acknowledgementTest.txt; ack: 1693616179;)

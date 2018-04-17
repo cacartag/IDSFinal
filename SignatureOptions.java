@@ -370,7 +370,7 @@ public class SignatureOptions{
         {
             //System.out.println("checking acknowledgement");
             int ackT = Integer.parseInt(ack);
-            if(ackT == Integer.parseInt(tcp.getSequenceNumberString()))
+            if(ackT == Integer.parseInt(tcp.getAcknowledgementNumberString()))
             {
                 matching = true;
             } else {
