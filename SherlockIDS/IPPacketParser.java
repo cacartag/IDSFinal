@@ -97,7 +97,7 @@ public class IPPacketParser{
             return "Could not convert payload to string";
         }
     }
-     
+    
     public void parsePacket(byte [] packet)
     {
         int versionIHLByte = 0;
@@ -321,6 +321,12 @@ public class IPPacketParser{
         }
 
         System.out.println("\n\n\n");
+    }
+    
+    public void setSourceAndDestination(String source, String destination)
+    {
+        sourceAddressString = source;
+        destinationAddressString = destination;
     }
     
     public void printHeaderOnly()

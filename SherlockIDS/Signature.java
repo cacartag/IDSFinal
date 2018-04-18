@@ -327,7 +327,7 @@ public class Signature{
             }
         }
         
-        // this will only not work for icmp
+        // this will be unset for icmp, arp, and ip packets
         if(portAvailable)
         {
             // if any is set for port 1 source, then don't need to check

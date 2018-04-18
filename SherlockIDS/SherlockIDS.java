@@ -146,6 +146,7 @@ public class SherlockIDS{
             
             byte [] packet = getPacket();
             eth = new EthernetParser();
+            arp = new ARPParser();
             ip = new IPPacketParser();
             tcp = new TCPParser();
             udp = new UDPParser();
@@ -410,7 +411,10 @@ public class SherlockIDS{
                         Signature arpRule = arpRules.get(x);
                         SignatureOptions arpOptions = arpRule.GetSignatureOptions();
                         
-                        boolean matchedSignature = arpRule.SignatureMatching(ip, 0, 0, true);
+                        IPPacketParser ipPlaceHolder = new IPPacketParser();
+                        ipPlaceHolder.setSourceAndDestination(arp.getSenderIPAddress(),arp.getTargetIPAddress());
+                        
+                        boolean matchedSignature = arpRule.SignatureMatching(ipPlaceHolder, 0, 0, false);
                         //boolean sizeAndContentMatching = CheckSizeAndContent(arpOptions,udp.getPayloadBytes(), udp.getPayloadSize());
                         
                         //tcpOptions.printOptions();

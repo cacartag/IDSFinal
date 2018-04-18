@@ -165,8 +165,8 @@ public class FragmentAdministrator extends Thread
         
         if((Integer.parseInt(ip.getProtocolString()) == 1) && (currentSID != 4))
         {
-            System.out.println("inside icmp admin");
-            icmp.parsePacket(ip.getPacket());
+            //System.out.println("inside icmp admin");
+            //icmp.parsePacket(ip.getPacket());
             fragmentOut.write("ICMP Traffic detected:\n");
             fragmentOut.write(icmp.printAllReturn());
             
@@ -241,7 +241,7 @@ public class FragmentAdministrator extends Thread
             fragmentOut.write("TCP Traffic detected\n");
             fragmentOut.write(tcp.printAllReturn());
             
-            System.out.println("inside tcp admin");
+            //System.out.println("inside tcp admin");
             //SignatureMatching(IPPacketParser ip, int sourcePort, int destinationPort, boolean portAvailable)
            
             //checking ip rules
@@ -316,7 +316,7 @@ public class FragmentAdministrator extends Thread
             fragmentOut.write("UDP Traffic detected\n");
             fragmentOut.write(udp.printAllReturn());
             
-            System.out.println("inside udp admin");
+            //System.out.println("inside udp admin");
             //checking ip rules
             CheckIPRules(ipRules,ip,currentSID);
            
@@ -375,7 +375,7 @@ public class FragmentAdministrator extends Thread
             
         } else {
             //SignatureMatching(IPPacketParser ip, int sourcePort, int destinationPort, boolean portAvailable)
-            System.out.println("inside ip only admin");
+            //System.out.println("inside ip only admin");
            CheckIPRules(ipRules,ip, currentSID);
 
         }
