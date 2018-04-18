@@ -379,66 +379,6 @@ public class Signature{
         SubnetUtils utilSubnet = new SubnetUtils(subnetIPMask); 
         SubnetInfo subnet = utilSubnet.getInfo();
         boolean matching = subnet.isInRange(ipMatching);
-        
-        //System.out.println("Ip Local: " + ipLocal);
-        //System.out.println("Ip Matching: " + ipMatching);
-        
-        //String [] ipLocalSplit = ipLocal.split("\\.");
-        //String [] ipMatchingSplit = ipMatching.split("\\.");
-        //
-        ////System.out.println("IP Local Split Length: " + ipLocalSplit.length);
-        ////System.out.println("IP Matching Split Length: " + ipMatchingSplit.length);
-        //
-        //int subnetMaskInt = Integer.parseInt(subnetMask);
-        //byte[] subnetMaskMask = new byte[4];
-        //
-        //byte [] ipLocalByte = new byte[4];
-        //byte [] ipMatchingByte = new byte[4];
-        //
-        //int ipLocalInt = 0;
-        //int ipMatchingInt = 0;
-        //
-        //int ipLocalAnd = 0;
-        //int ipMatchingAnd = 0;
-        //
-        //int smaskCount = 0;
-        //for(int x = 0; x < subnetMaskInt; x++)
-        //{
-        //    subnetMaskMask = subnetMaskMask | (1 << (32-x));
-        //    if()
-        //}
-        //
-        //for(int x = 0; x < 4; x++)
-        //{
-        //    //DatatypeConverter.parseHexBinary(contentArray[x])[0];
-        //    // DatatypeConverter.parseHexBinary(ipLocalSplit[x])[0];
-        //    //DatatypeConverter.parseHexBinary(ipMatchingSplit[x])[0];
-        //    
-        //    ipLocalByte[x] = (byte)Integer.parseInt(ipLocalSplit[x]);
-        //    ipMatchingByte[x] = (byte)Integer.parseInt(ipMatchingSplit[x]);
-        //    
-        //    //System.out.println("Ip Local Split "+x+" : " +Integer.parseInt(ipLocalSplit[x]));
-        //    //System.out.println("Ip Matching Split "+x+" : "+ Integer.parseInt(ipMatchingSplit[x]));
-        //}
-        //
-        //ipLocalInt = (ipLocalByte[0] << 24) | (ipLocalByte[1] << 16) | (ipLocalByte[2] << 8) | (ipLocalByte[3]);
-        //ipMatchingInt = (ipMatchingByte[0] << 24) | (ipMatchingByte[1] << 16) | (ipMatchingByte[2] << 8) | (ipMatchingByte[3]);
-        //
-        //ipLocalAnd = ipLocalInt & subnetMaskMask;
-        //ipMatchingAnd = ipMatchingInt & subnetMaskMask;
-        //
-        //System.out.println("Ip Local Int: " + ipLocalInt);
-        //System.out.println("Ip Matching Int" + ipMatchingInt);
-        //
-        //System.out.println("Subnet mask: " + subnetMaskMask);
-        //
-        //System.out.println("Ip Local And: " + ipLocalAnd);
-        //System.out.println("Ip Matching And: " + ipMatchingAnd);
-        //
-        //if(ipLocalAnd == ipMatchingAnd)
-        //{
-        //    matching = true;
-        //}
 
         return matching;
     }

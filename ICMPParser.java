@@ -115,4 +115,28 @@ public class ICMPParser
         
         System.out.println("\n\n\n");
     }
+    
+    public String printAllReturn()
+    {
+        String icmp = new String();
+        
+        icmp += "ICMP Header:";
+        icmp += "Type: " + typeString + "\n";
+        icmp += "Code: " + codeString + "\n";
+        icmp += "Checksum: " + checkSumString + "\n";
+        icmp += "Rest of Header: " + restOfHeaderString + "\n";
+        
+        try
+        {
+            String payloadString = new String(payload, "UTF-8");           
+            icmp += payloadString + "\n";
+        } catch(Exception e)
+        {
+            icmp += "Could not convert payload to string \n";
+        }
+        
+        icmp += "\n\n\n";
+        
+        return icmp;
+    }
 }

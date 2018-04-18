@@ -511,12 +511,7 @@ public class SignatureOptions{
     
     public boolean SIDSet()
     {
-        if(!fragoffset.isEmpty())
-        {
-            return true;
-        }
-        
-        return false;
+        return !sid.isEmpty();
     }
     
     public boolean ContentMatching(byte[] payload)

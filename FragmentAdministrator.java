@@ -12,6 +12,8 @@ import java.io.FileWriter;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.time.format.DateTimeFormatter;  
 import java.time.LocalDateTime;    
+import java.util.ArrayList;
+import java.util.Collection;
 
 public class FragmentAdministrator extends Thread
 {
@@ -76,19 +78,39 @@ public class FragmentAdministrator extends Thread
                         if(s.getSid() == 2)
                         {
                             out.write("Overlap Detected\n");
-                        }
-                        
-                        if(s.getSid() == 4)
+                            
+                            String parsedPacket = (s.getReassembledPacket()).printAllReturn();
+                            out.write(parsedPacket);
+                            
+                            doneID.addElement((s.getReassembledPacket()).getIdentification());
+                            
+                            CheckRules(s.getReassembledPacket(),out,s.getSid());
+                            
+                        } else if(s.getSid() == 3)
                         {
-                            out.write("Timeout Detected\n");
+                            out.write("Packet larger than 64K has been detected\n");
+                            
+                            CheckRules(((s.getFragments()).get((s.getFragments()).firstKey())),out,s.getSid());
                         }
+                        else if(s.getSid() == 4)
+                        {
+                            out.write("Timeout Detected, incomplete fragments are: \n");
+
+    
+                            printIncompletePackets((s.getFragments()).values(), out);
+                            
+                            // ((s.getFragments()).get((s.getFragments()).firstKey())).printAll();
+                            
+                            CheckRules(((s.getFragments()).get((s.getFragments()).firstKey())),out,s.getSid());
+                        } else {
                         
-                        String parsedPacket = (s.getReassembledPacket()).printAllReturn();
-                        out.write(parsedPacket);
-                        
-                        doneID.addElement((s.getReassembledPacket()).getIdentification());
-                        
-                        CheckRules(s.getReassembledPacket(),out);
+                            String parsedPacket = (s.getReassembledPacket()).printAllReturn();
+                            out.write(parsedPacket);
+                            
+                            doneID.addElement((s.getReassembledPacket()).getIdentification());
+                            
+                            CheckRules(s.getReassembledPacket(),out,1;
+                        }
                     }
                     catch (Exception e)
                     {
@@ -135,18 +157,21 @@ public class FragmentAdministrator extends Thread
         System.out.println("main Done, and no more threads");
     }
     
-    public void CheckRules(IPPacketParser ip, BufferedWriter fragmentOut) throws Exception
+    public void CheckRules(IPPacketParser ip, BufferedWriter fragmentOut, int currentSID) throws Exception
     {
         icmp = new ICMPParser();
         tcp = new TCPParser();
         udp = new UDPParser();
         
-        if(Integer.parseInt(ip.getProtocolString()) == 1)
+        if((Integer.parseInt(ip.getProtocolString()) == 1) && (currentSID != 4))
         {
+            System.out.println("inside icmp admin");
             icmp.parsePacket(ip.getPacket());
+            fragmentOut.write("ICMP Traffic detected:\n");
+            fragmentOut.write(icmp.printAllReturn());
             
             //checking ip rules
-            CheckIPRules(ipRules,ip);
+            CheckIPRules(ipRules,ip,currentSID);
             
             // checking icmp rules
             for(int x = 0; x < icmpRules.size(); x++)
@@ -159,8 +184,9 @@ public class FragmentAdministrator extends Thread
                 boolean matchedSignature = icmpRule.SignatureMatching(ip, 0, 0, false);
                 boolean matchedOptions = icmpOptions.CheckMatchingICMP(icmp);
                 boolean sizeAndContentMatching = CheckSizeAndContent(icmpOptions,icmp.getPayloadBytes(), icmp.getPayloadSize());
+                boolean checkSID = sidComparison(icmpOptions,currentSID);
                 
-                if(matchedSignature && matchedOptions && sizeAndContentMatching)
+                if(matchedSignature && matchedOptions && sizeAndContentMatching && checkSID)
                 {
                     String message = icmpOptions.messageToPrint();
                     String sid = icmpOptions.getSID();
@@ -184,12 +210,7 @@ public class FragmentAdministrator extends Thread
                         
                         if(!message.isEmpty())
                         {
-                            write += message + " ";
-                        }
-                        
-                        if(!sid.isEmpty())
-                        {
-                            write += sid;
+                            write += message + " from fragment administrator" ;
                         }
                         
                         write += "\n\n";
@@ -214,16 +235,17 @@ public class FragmentAdministrator extends Thread
                 }
             }
             
-        }else if(Integer.parseInt(ip.getProtocolString()) == 6)// check that the protocol is TCP
+        }else if((Integer.parseInt(ip.getProtocolString()) == 6) && (currentSID != 4))// check that the protocol is TCP
         {
             tcp.parsePacket(ip.getPacket());
-            fragmentOut.write("TCP Traffic detected by IP\n\n");
+            fragmentOut.write("TCP Traffic detected\n");
             fragmentOut.write(tcp.printAllReturn());
             
+            System.out.println("inside tcp admin");
             //SignatureMatching(IPPacketParser ip, int sourcePort, int destinationPort, boolean portAvailable)
            
             //checking ip rules
-            CheckIPRules(ipRules,ip);
+            CheckIPRules(ipRules,ip,currentSID);
             // checking tcp rules
             for(int x = 0; x < tcpRules.size(); x++)
             {
@@ -233,12 +255,13 @@ public class FragmentAdministrator extends Thread
                 boolean matchedSignature = tcpRule.SignatureMatching(ip, Integer.parseInt(tcp.getSourcePortString()), Integer.parseInt(tcp.getDestinationPortString()), true);
                 boolean matchedOptions = tcpOptions.CheckMatchingTCP(tcp);
                 boolean sizeAndContentMatching = CheckSizeAndContent(tcpOptions,tcp.getPayloadBytes(), tcp.getPayloadSize());
+                boolean checkSID = sidComparison(tcpOptions,currentSID);
                 
                 //if(sizeAndContentMatching)
                 //    System.out.println("matches content");
                         
                 //tcpOptions.printOptions();
-                if(matchedSignature && matchedOptions && sizeAndContentMatching)
+                if(matchedSignature && matchedOptions && sizeAndContentMatching && checkSID)
                 {
                     String message = tcpOptions.messageToPrint();
                     String sid = tcpOptions.getSID();
@@ -265,11 +288,6 @@ public class FragmentAdministrator extends Thread
                             write += message + " from fragment administrator" ;
                         }
                         
-                        if(!sid.isEmpty())
-                        {
-                            write += sid;
-                        }
-                        
                         write += "\n\n";
                         
                         out.write(write);
@@ -292,13 +310,15 @@ public class FragmentAdministrator extends Thread
             }
            
            
-        } else if(Integer.parseInt(ip.getProtocolString()) == 17)
+        } else if((Integer.parseInt(ip.getProtocolString()) == 17) && (currentSID != 4))
         {
             udp.parsePacket(ip.getPacket());
-            //udp.printAll();
+            fragmentOut.write("UDP Traffic detected\n");
+            fragmentOut.write(udp.printAllReturn());
             
+            System.out.println("inside udp admin");
             //checking ip rules
-            CheckIPRules(ipRules,ip);
+            CheckIPRules(ipRules,ip,currentSID);
            
             for(int x = 0; x < udpRules.size(); x++)
             {
@@ -308,9 +328,10 @@ public class FragmentAdministrator extends Thread
                 boolean matchedSignature = udpRule.SignatureMatching(ip, Integer.parseInt(udp.getSourcePortString()), Integer.parseInt(udp.getDestinationPortString()), true);
             
                 boolean sizeAndContentMatching = CheckSizeAndContent(udpOptions,udp.getPayloadBytes(), udp.getPayloadSize());
+                boolean checkSID = sidComparison(udpOptions,currentSID);
                 
                 //tcpOptions.printOptions();
-                if(matchedSignature && sizeAndContentMatching)
+                if(matchedSignature && sizeAndContentMatching && checkSID)
                 {
                     String message = udpOptions.messageToPrint();
                     String sid = udpOptions.getSID();
@@ -334,12 +355,7 @@ public class FragmentAdministrator extends Thread
                         
                         if(!message.isEmpty())
                         {
-                            write += message + " ";
-                        }
-                        
-                        if(!sid.isEmpty())
-                        {
-                            write += sid;
+                            write += message + " from fragment administrator" ;
                         }
                         
                         write += "\n\n";
@@ -353,24 +369,20 @@ public class FragmentAdministrator extends Thread
                         {
                             System.out.println(message);
                         }
-                        
-                        if(!sid.isEmpty())
-                        {
-                            System.out.println(sid);
-                        }
                     }
                 }   
             }
             
         } else {
             //SignatureMatching(IPPacketParser ip, int sourcePort, int destinationPort, boolean portAvailable)
-           CheckIPRules(ipRules,ip);
+            System.out.println("inside ip only admin");
+           CheckIPRules(ipRules,ip, currentSID);
 
         }
         
     }
     
-    public void CheckIPRules(Vector<Signature> ipRules,IPPacketParser ip) throws Exception
+    public void CheckIPRules(Vector<Signature> ipRules,IPPacketParser ip,int currentSID) throws Exception
     {
         // checking ip rules
         for(int x = 0; x < ipRules.size(); x++)
@@ -381,8 +393,9 @@ public class FragmentAdministrator extends Thread
             boolean matchedSignature = ipRule.SignatureMatching(ip,0, 0, false);
             boolean matchedOptions = ipOptions.CheckMatchingIP(ip);
             boolean sizeAndContentMatching = CheckSizeAndContent(ipOptions,ip.getPayloadBytes(), ip.getPayloadSize());
+            boolean checkSID = sidComparison(ipOptions,currentSID);
             
-            if(matchedSignature && matchedOptions && sizeAndContentMatching)
+            if(matchedSignature && matchedOptions && sizeAndContentMatching && checkSID)
             {
                 String message = ipOptions.messageToPrint();
                 String sid = ipOptions.getSID();
@@ -404,12 +417,7 @@ public class FragmentAdministrator extends Thread
                     
                     if(!message.isEmpty())
                     {
-                        write += message + " ";
-                    }
-                    
-                    if(!sid.isEmpty())
-                    {
-                        write += sid;
+                        write += message + " from fragment administrator" ;
                     }
                     
                     write += "\n\n";
@@ -422,11 +430,6 @@ public class FragmentAdministrator extends Thread
                     if(!message.isEmpty())
                     {
                         System.out.println(message);
-                    }
-                    
-                    if(!sid.isEmpty())
-                    {
-                        System.out.println(sid);
                     }
                 }
             }
@@ -450,5 +453,38 @@ public class FragmentAdministrator extends Thread
         }
         
         return payloadSizeMatching & payloadContentMatching;
+    }
+    
+    public void printIncompletePackets(Collection<IPPacketParser> incompleteFrags, BufferedWriter fragmentOut) throws Exception
+    {                    
+        icmp = new ICMPParser();
+        tcp = new TCPParser();
+        udp = new UDPParser();
+    
+        ArrayList<IPPacketParser> incompleteFragments = new ArrayList<IPPacketParser>(incompleteFrags);
+        
+        for(int x = 0; x < incompleteFragments.size(); x++)
+        {
+            fragmentOut.write((incompleteFragments.get(x)).printAllReturn());
+        }
+    }
+    
+    public boolean sidComparison(SignatureOptions option,int currentSID)
+    {
+        boolean matching = true;
+
+        if(option.SIDSet())
+        {
+            int ruleSID = Integer.parseInt(option.getSID());
+            if(ruleSID == currentSID)
+            {
+                matching = true;
+            } else {
+                matching = false;
+            }
+        }
+            
+        return matching;
+        
     }
 }

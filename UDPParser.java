@@ -116,4 +116,29 @@ public class UDPParser
         
         System.out.println("\n\n\n");
     }
+    
+    public String printAllReturn()
+    {
+        String udp = new String();
+        
+        udp += "UDP Header: ";
+        udp += "Source Port: " + sourcePortString + "\n";
+        udp += "Destination Port: " + destinationPortString + "\n";
+        udp += "Length: " + lengthString + "\n";
+        udp += "Check Sum: " + checkSumString + "\n";
+        
+        try
+        {
+            String payloadString = new String(payload,"UTF-8");           
+            udp += payloadString + "\n";
+        } catch(Exception e)
+        {
+            udp += "Could not convert payload to string \n";
+        }
+        
+        udp += "\n\n\n";
+        
+        return udp;
+    }
+    
 }

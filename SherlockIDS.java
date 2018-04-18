@@ -167,7 +167,8 @@ public class SherlockIDS{
                         //System.out.println("Detected Fragment");
                         if(!fragmentIDs.contains(ip.getIdentification()))
                         {
-                            
+                            //System.out.println("Fragment IP Header: ");
+                            //ip.printHeaderOnly();
                             // new id received
                             
                             IPFragmentAssembler ipf = new IPFragmentAssembler(packetQueue,ip.getIdentification(),reassembledPacketQueue);
@@ -211,8 +212,9 @@ public class SherlockIDS{
                                 boolean matchedSignature = icmpRule.SignatureMatching(ip, 0, 0, false);
                                 boolean matchedOptions = icmpOptions.CheckMatchingICMP(icmp);
                                 boolean sizeAndContentMatching = CheckSizeAndContent(icmpOptions,icmp.getPayloadBytes(), icmp.getPayloadSize());
+                                boolean sidSet = icmpOptions.SIDSet();
                                 
-                                if(matchedSignature && matchedOptions && sizeAndContentMatching)
+                                if(matchedSignature && matchedOptions && sizeAndContentMatching && !sidSet)
                                 {
                                     String message = icmpOptions.messageToPrint();
                                     String sid = icmpOptions.getSID();
@@ -239,11 +241,6 @@ public class SherlockIDS{
                                             write += message + " ";
                                         }
                                         
-                                        if(!sid.isEmpty())
-                                        {
-                                            write += sid;
-                                        }
-                                        
                                         write += "\n\n";
                                         
                                         out.write(write);
@@ -255,14 +252,7 @@ public class SherlockIDS{
                                         {
                                             System.out.println(message);
                                         }
-                                        
-                                        if(!sid.isEmpty())
-                                        {
-                                            System.out.println(sid);
-                                        }
                                     }
-                                    
-
                                 }
                             }
                             
@@ -284,12 +274,13 @@ public class SherlockIDS{
                                 boolean matchedSignature = tcpRule.SignatureMatching(ip, Integer.parseInt(tcp.getSourcePortString()), Integer.parseInt(tcp.getDestinationPortString()), true);
                                 boolean matchedOptions = tcpOptions.CheckMatchingTCP(tcp);
                                 boolean sizeAndContentMatching = CheckSizeAndContent(tcpOptions,tcp.getPayloadBytes(), tcp.getPayloadSize());
+                                boolean sidSet = tcpOptions.SIDSet();
                                 
                                 //if(sizeAndContentMatching)
                                 //    System.out.println("matches content");
                                         
                                 //tcpOptions.printOptions();
-                                if(matchedSignature && matchedOptions && sizeAndContentMatching)
+                                if(matchedSignature && matchedOptions && sizeAndContentMatching && !sidSet)
                                 {
                                     String message = tcpOptions.messageToPrint();
                                     String sid = tcpOptions.getSID();
@@ -316,10 +307,10 @@ public class SherlockIDS{
                                             write += message + " ";
                                         }
                                         
-                                        if(!sid.isEmpty())
-                                        {
-                                            write += sid;
-                                        }
+                                        //if(!sid.isEmpty())
+                                        //{
+                                        //    write += sid;
+                                        //}
                                         
                                         write += "\n\n";
                                         
@@ -331,11 +322,6 @@ public class SherlockIDS{
                                         if(!message.isEmpty())
                                         {
                                             System.out.println(message);
-                                        }
-                                        
-                                        if(!sid.isEmpty())
-                                        {
-                                            System.out.println(sid);
                                         }
                                     }
                                 }
@@ -360,8 +346,10 @@ public class SherlockIDS{
                             
                                 boolean sizeAndContentMatching = CheckSizeAndContent(udpOptions,udp.getPayloadBytes(), udp.getPayloadSize());
                                 
+                                boolean sidSet = udpOptions.SIDSet();
+                                
                                 //tcpOptions.printOptions();
-                                if(matchedSignature && sizeAndContentMatching)
+                                if(matchedSignature && sizeAndContentMatching && !sidSet)
                                 {
                                     String message = udpOptions.messageToPrint();
                                     String sid = udpOptions.getSID();
@@ -388,11 +376,6 @@ public class SherlockIDS{
                                             write += message + " ";
                                         }
                                         
-                                        if(!sid.isEmpty())
-                                        {
-                                            write += sid;
-                                        }
-                                        
                                         write += "\n\n";
                                         
                                         out.write(write);
@@ -404,13 +387,8 @@ public class SherlockIDS{
                                         {
                                             System.out.println(message);
                                         }
-                                        
-                                        if(!sid.isEmpty())
-                                        {
-                                            System.out.println(sid);
-                                        }
                                     }
-                                }   
+                                }
                             }
                             
                         } else {
@@ -421,11 +399,59 @@ public class SherlockIDS{
                     }
                 } else if(eth.getTypeString().equals("0806"))
                 {
-                    // goint to need to check this
+                    // going to need to check this
                     // eth.printHeaderOnly();
                     arp.parsePacket(packet);
                     
                     arp.printAll();
+                    
+                    for(int x = 0; x < arpRules.size(); x++)
+                    {
+                        Signature arpRule = arpRules.get(x);
+                        SignatureOptions arpOptions = arpRule.GetSignatureOptions();
+                        
+                        boolean matchedSignature = arpRule.SignatureMatching(ip, 0, 0, true);
+                        //boolean sizeAndContentMatching = CheckSizeAndContent(arpOptions,udp.getPayloadBytes(), udp.getPayloadSize());
+                        
+                        //tcpOptions.printOptions();
+                        if(matchedSignature)
+                        {
+                            String message = arpOptions.messageToPrint();
+                            String sid = arpOptions.getSID();
+                            String logto = arpOptions.fileToPrintTo();
+                            
+                            BufferedWriter out = null;
+                            FileWriter fstream;
+                            
+                            if(!logto.isEmpty())
+                            {
+                                fstream = new FileWriter(logto,true);
+                                out = new BufferedWriter(fstream);
+                                String write = new String();
+
+                                DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");  
+                                LocalDateTime now = LocalDateTime.now();  
+                                write += dtf.format(now) + " ";   
+                                
+                                if(!message.isEmpty())
+                                {
+                                    write += message + " ";
+                                }
+                                
+                                write += "\n\n";
+                                
+                                out.write(write);
+                                
+                                out.close();
+
+                            } else {
+                                if(!message.isEmpty())
+                                {
+                                    System.out.println(message);
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
@@ -575,8 +601,9 @@ public class SherlockIDS{
             boolean matchedSignature = ipRule.SignatureMatching(ip,0, 0, false);
             boolean matchedOptions = ipOptions.CheckMatchingIP(ip);
             boolean sizeAndContentMatching = CheckSizeAndContent(ipOptions,ip.getPayloadBytes(), ip.getPayloadSize());
+            boolean sidSet = ipOptions.SIDSet();
             
-            if(matchedSignature && matchedOptions && sizeAndContentMatching)
+            if(matchedSignature && matchedOptions && sizeAndContentMatching && !sidSet)
             {
                 String message = ipOptions.messageToPrint();
                 String sid = ipOptions.getSID();
@@ -601,11 +628,6 @@ public class SherlockIDS{
                         write += message + " ";
                     }
                     
-                    if(!sid.isEmpty())
-                    {
-                        write += sid;
-                    }
-                    
                     write += "\n\n";
                     
                     out.write(write);
@@ -616,11 +638,6 @@ public class SherlockIDS{
                     if(!message.isEmpty())
                     {
                         System.out.println(message);
-                    }
-                    
-                    if(!sid.isEmpty())
-                    {
-                        System.out.println(sid);
                     }
                 }
             }
@@ -645,5 +662,4 @@ public class SherlockIDS{
         
         return payloadSizeMatching & payloadContentMatching;
     }
-
 }

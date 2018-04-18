@@ -1,6 +1,0 @@
-alert tcp any any -> 192.168.1.0/24 139 (msg: "DOS Winnuke attack"; flags:U+;logto: winnuke.txt;)
-alert icmp 8.8.8.8/16 any -> any any (msg: "Google icmp Echo received"; sid:40; itype:0; icode:0; logto: captureGoogle.txt;)
-alert tcp any any -> any any (flags:S; msg:"SYN packet"; logto: connectingMessages.txt;)
-alert ip any any -> any any (fragbits: M+; msg:"fragmentation detected"; logto: fragmentAlerts.txt;)
-alert ip any any -> any any (fragoffset: 3; msg: "fragment offset of 3"; logto: specificFragmentOffset.txt;)
-alert ip any any -> any any (msg: "testing full capacity of content matcher"; logto: httpContentMatched.txt; content: "|74 2d 54 79 70 65 3a 20 74|";)
