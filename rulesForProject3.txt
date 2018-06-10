@@ -1,4 +1,0 @@
-alert tcp any any -> 192.168.1.0/24 139 (msg: "DOS Winnuke attack"; flags:U+; logto:winnukeDetected.txt;)
-alert ip 192.168.1.200/28 any -> 192.168.1.10/24 any (msg: "possible jolt attack detected from 192.168.1.200, timeout in pre-processor"; sid: 4; logto: joltDetected.txt;)
-alert ip 192.168.1.20/28 any -> 192.168.1.10/24 any (msg: "possible jolt attack detected from 192.168.1.20, timeout in pre-processor"; sid: 4; logto: joltDetected.txt;)
-alert udp 129.244.125.194/24 4153 -> 129.244.73.185/24 61045 (msg: "possible teardrop attack detected, overlap in pre-processor"; sid:2; logto:teardropDetected.txt;)
